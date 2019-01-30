@@ -85,7 +85,7 @@ class Ceiling {
         this.rows = rows;
         this.cols = cols;
         this.size = size;
-        this.gap = gap || 2;
+        this.gap = gap;
         this.panels = [];
 
         for(var row = 0; row < rows; row++) {
@@ -93,7 +93,7 @@ class Ceiling {
             for(var col = 0; col < cols; col++) {
                 var x = col * (this.size + this.gap);
                 var y = row * (this.size + this.gap);
-                var panel = new Panel(this.canvas, x, y, this.size);
+                var panel = new Panel(this.canvas, x, y, this.size - this.gap);
                 rowPanels.push(panel);
             }
             this.panels.push(rowPanels);
