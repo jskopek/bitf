@@ -120,9 +120,11 @@ class Ceiling {
 }
 
 class ClickableCeiling extends Ceiling {
-    constructor(canvas, rows, cols, size, gap) {
+    constructor(canvas, rows, cols, size, gap, color, opacity) {
         super(canvas, rows, cols, size, gap);
         this.clickedPanels = false;
+        this.color = color || [40,100,105];
+        this.opacity = opacity || 1;
 
         this.canvas.addEventListener('mousemove', (e) => {
             if(!this.clickedPanels) { return; }
@@ -146,8 +148,8 @@ class ClickableCeiling extends Ceiling {
 
         this.canvas.addEventListener('mousedown', (e) => {
             this.clickedPanels = {};
-            this.targetOpacity = sequence.opacity
-            this.targetColor = sequence.color
+            this.targetOpacity = this.opacity;
+            this.targetColor = this.color;
         });
         this.canvas.addEventListener('mouseup', (e) => {
             this.clickedPanels = false;
@@ -155,19 +157,11 @@ class ClickableCeiling extends Ceiling {
     }
 }
 
-var canvas = document.querySelector('#test');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-var panelSize = Math.min(canvas.width, canvas.height) / 10;
-var ceiling = new ClickableCeiling(canvas, 10, 10, panelSize);
-
 class Sequence {
     constructor(ceiling) {
         this.ceiling = ceiling;
         this.step = 0;
         this.numSteps = 0;
-        this.color = [40,100,105];
-        this.opacity = 1;
         try {
             this.sequence = JSON.parse(localStorage.getItem('sequence'));
             this.numSteps = this.sequence.length;
@@ -207,6 +201,16 @@ class Sequence {
         this.ceiling.load(this.sequence[this.step]);
     }
 }
+
+
+// initialize
+var canvas = document.querySelector('#test');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+var panelSize = Math.min(canvas.width, canvas.height) / 10;
+var ceiling = new ClickableCeiling(canvas, 10, 10, panelSize, 2);
+
 var sequence = new Sequence(ceiling);
 
 // GUI
