@@ -9,63 +9,58 @@ class Panel {
         this.size = size;
         this.opacity = 1;
         this.red = Math.round(Math.random() * 255);
-        this.blue = Math.round(Math.random() * 255);
         this.green = Math.round(Math.random() * 255);
+        this.blue = Math.round(Math.random() * 255);
+        this.sequence = [];
 
         this.render();
-        setInterval(() => {
-            this.render();
-        }, 1000);
     }
     render() {
+        this.ctx.clearRect(this.x, this.y, this.size, this.size);
         this.ctx.beginPath();
         this.ctx.rect(this.x,this.y,this.size,this.size);
-        this.ctx.fillStyle = 'black';
+        this.ctx.fillStyle = `rgba(${this.red},${this.green},${this.blue},${this.opacity})`;
         this.ctx.fill();
+    }
+    setColor(red, green, blue, opacity, playSpeed) {
+        if(!playSpeed) { playSpeed = 100; }
 
-        this.ctx.beginPath();
-        this.ctx.rect(this.x,this.y,this.size,this.size);
-        this.ctx.fillStyle = `rgba(${this.red},${this.blue},${this.green},${this.opacity})`;
-        this.ctx.fill();
-    }
-    setOpacity(opacity) {
-        var sequence = this.generateSequence(this.opacity, opacity, 10);
-        this.runSequence(sequence, 500, (opacity) => {
-            this.opacity = opacity;
-            this.render()
-        });
-    }
-    setColor(red, blue, green) {
         var redSequence = this.generateSequence(this.red, red, 10);
-        var blueSequence = this.generateSequence(this.blue, blue, 10);
         var greenSequence = this.generateSequence(this.green, green, 10);
-        var sequence = _.zip(redSequence, blueSequence, greenSequence);
-        this.runSequence(sequence, Math.random() * 500, (color) => {
-            this.red = color[0];
-            this.blue = color[1];
-            this.green = color[2];
-            this.render()
-        });
+        var blueSequence = this.generateSequence(this.blue, blue, 10);
+        var opacity = this.generateSequence(this.opacity, opacity, 10);
+
+        var isRunning = this.sequence.length ? true : false;
+        this.sequence = _.zip(redSequence, blueSequence, greenSequence, opacity);
+
+        var totalTime = Math.random() * playSpeed;
+        var intervalTime = totalTime / this.sequence.length;
+
+        if(!isRunning) {
+            this.runSequence(intervalTime, (color) => {
+                this.red = color[0];
+                this.green = color[1];
+                this.blue = color[2];
+                this.opacity = color[3];
+                this.render()
+            });
+        }
 
     }
     save() {
-        return [this.red, this.blue, this.green, this.opacity];
+        return [this.red, this.green, this.blue, this.opacity];
     }
-    load(values) {
-        this.setColor(values[0], values[1], values[2]);
-        this.setOpacity(values[3]);
+    load(values, playSpeed) {
+        this.setColor(values[0], values[1], values[2], values[3], playSpeed);
     }
-    runSequence(sequence, time, action) {
-        var step = 0;
-        var numSteps = sequence.length;
-        var intervalTime = time / numSteps;
-        var transition = setInterval(() => {
-            action(sequence[step]);
-            step += 1;
-            if(step == numSteps) {
-                return clearInterval(transition);
-            }
-        }, intervalTime);
+    runSequence(intervalTime, action) {
+        action(this.sequence[0]);
+        this.sequence.splice(0,1);
+        if(this.sequence.length) {
+            setTimeout(() => {
+                this.runSequence(intervalTime, action)
+            }, intervalTime);
+        }
     }
     generateSequence(from, to, numSteps) {
         var stepDiff = (to - from) / numSteps;
@@ -108,11 +103,11 @@ class Ceiling {
         }
         return values;
     }
-    load(values) {
+    load(values, playSpeed) {
         var i = 0;
         for(var row = 0; row < this.rows; row++) {
             for(var col = 0; col < this.cols; col++) {
-                this.panels[row][col].load(values[i]);
+                this.panels[row][col].load(values[i], playSpeed);
                 i++;
             }
         }
@@ -142,18 +137,25 @@ class ClickableCeiling extends Ceiling {
 
             var panel = this.panels[row][col];
 
-            panel.setColor(...this.targetColor);
-            panel.setOpacity(this.targetOpacity);
+            console.log('panel.SetColor', this.color);
+            panel.setColor(...this.color, this.opacity);
         });
 
         this.canvas.addEventListener('mousedown', (e) => {
             this.clickedPanels = {};
-            this.targetOpacity = this.opacity;
-            this.targetColor = this.color;
         });
         this.canvas.addEventListener('mouseup', (e) => {
             this.clickedPanels = false;
         });
+    }
+    sample() {
+        this.canvas.addEventListener('click', (e) => {
+            var col = Math.floor(e.offsetX / (this.size + this.gap));
+            var row = Math.floor(e.offsetY / (this.size + this.gap));
+            var panel = this.panels[row][col];
+            this.color = [panel.red,panel.green,panel.blue];
+            this.opacity = panel.opacity
+        }, {once: true});
     }
 }
 
@@ -162,12 +164,24 @@ class Sequence {
         this.ceiling = ceiling;
         this.step = 0;
         this.numSteps = 0;
+
+        this.running = false;
+        this.loop = false;
+        this.boomerang = false;
+        this.directionForward = true;
+        this.playSpeed = 100;
+        this.sequence = [];
+
         try {
-            this.sequence = JSON.parse(localStorage.getItem('sequence'));
-            this.numSteps = this.sequence.length;
+            var sequence = JSON.parse(localStorage.getItem('sequence'));
+            this.load(sequence);
         } catch {
-            this.sequence = []
         }
+    }
+    load(sequence) {
+        this.sequence = sequence;
+        this.step = 0;
+        this.numSteps = this.sequence.length;
         if(this.sequence.length) {
             this.ceiling.load(this.sequence[this.step]);
         }
@@ -191,17 +205,54 @@ class Sequence {
     next() {
         if(this.step >= this.sequence.length - 1) { return; }
         this.step += 1;
-        console.log(this.sequence.length, this.step, this.sequence[this.step]);
-        this.ceiling.load(this.sequence[this.step]);
+        this.ceiling.load(this.sequence[this.step], this.playSpeed);
     }
     prev() {
         if(this.step <= 0) { return; }
         this.step -= 1;
-        console.log(this.sequence.length, this.step, this.sequence[this.step]);
-        this.ceiling.load(this.sequence[this.step]);
+        this.ceiling.load(this.sequence[this.step], this.playSpeed);
+    }
+    play() {
+        this.running = true;
+        this.run();
+    }
+    stop() {
+        this.running = false;
+    }
+    run() {
+        if(!this.running) { return; }
+        var isFinalStep = this.step == this.sequence.length - 1 ? true : false
+        var isFirstStep = this.step == 0 ? true : false
+        if(isFirstStep && this.boomerang && !this.directionForward) {
+            this.directionForward = true;
+        } else if(isFinalStep && this.boomerang && this.directionForward) {
+            this.directionForward = false;
+        } else if(!isFinalStep && this.directionForward) {
+            this.next();
+        } else if(!isFirstStep && !this.directionForward) {
+            this.prev();
+        } else if(isFinalStep && this.loop) {
+            this.step = 0;
+        } else {
+            this.running = false;
+        }
+
+        setTimeout(() => { this.run() }, this.playSpeed);
+    }
+    download() {
+        var exportObj = this.sequence;
+        var exportName = 'sequence';
+
+        // Source: https://stackoverflow.com/a/30800715
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+        var downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href",     dataStr);
+        downloadAnchorNode.setAttribute("download", exportName + ".json");
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
     }
 }
-
 
 // initialize
 var canvas = document.querySelector('#test');
@@ -216,8 +267,9 @@ var sequence = new Sequence(ceiling);
 // GUI
 const gui = new dat.GUI();
 var styleGUI = gui.addFolder('Style');
-styleGUI.addColor(ceiling, 'color');
-styleGUI.add(ceiling, 'opacity', 0, 1);
+styleGUI.addColor(ceiling, 'color').listen();
+styleGUI.add(ceiling, 'opacity', 0, 1).listen();
+styleGUI.add(ceiling, 'sample');
 styleGUI.open();
 
 var sequenceGUI = gui.addFolder('Sequence');
@@ -227,4 +279,28 @@ sequenceGUI.add(sequence, 'next');
 sequenceGUI.add(sequence, 'prev');
 sequenceGUI.add(sequence, 'save');
 sequenceGUI.add(sequence, 'remove');
+sequenceGUI.add(sequence, 'download');
 sequenceGUI.open();
+var sequenceRunnerGUI = gui.addFolder('Sequence Runner');
+sequenceRunnerGUI.add(sequence, 'play');
+sequenceRunnerGUI.add(sequence, 'stop');
+sequenceRunnerGUI.add(sequence, 'loop')
+sequenceRunnerGUI.add(sequence, 'boomerang')
+sequenceRunnerGUI.add(sequence, 'directionForward').listen();
+sequenceRunnerGUI.add(sequence, 'playSpeed', 100, 3000)
+sequenceRunnerGUI.open();
+
+// load dropped sequences
+window.addEventListener("dragover", (e) => { e.preventDefault(); },false);
+window.addEventListener("drop", (e) => {
+    e.preventDefault();
+
+    var file = e.dataTransfer.items[0].getAsFile();
+    var reader = new FileReader();
+    reader.onload = (evt) => {
+        var droppedSequence = JSON.parse(evt.target.result);
+        sequence.load(droppedSequence);
+    }
+    reader.readAsText(file);
+
+},false);
