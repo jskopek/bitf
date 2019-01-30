@@ -1,10 +1,13 @@
 const path = require('path');
 
 module.exports = {
-    entry: './bitf.js',
+    entry: {
+        'bitf': './bitf.js',
+        'viewer': './viewer.js'
+    },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'bitf.bundle.js'
+        filename: '[name].bundle.js'
     },
     mode: 'development',
     watch: true
