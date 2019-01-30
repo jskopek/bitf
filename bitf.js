@@ -208,16 +208,19 @@ class Sequence {
     }
 }
 var sequence = new Sequence(ceiling);
+
+// GUI
 const gui = new dat.GUI();
-var f1 = gui.addFolder('Style');
-f1.addColor(sequence, 'color');
-f1.add(sequence, 'opacity', 0, 1);
-f1.open();
-var f2 = gui.addFolder('Sequence');
-f2.add(sequence, 'step').listen();
-f2.add(sequence, 'numSteps').listen();
-f2.add(sequence, 'next');
-f2.add(sequence, 'prev');
-f2.add(sequence, 'save');
-f2.add(sequence, 'remove');
-f2.open();
+var styleGUI = gui.addFolder('Style');
+styleGUI.addColor(ceiling, 'color');
+styleGUI.add(ceiling, 'opacity', 0, 1);
+styleGUI.open();
+
+var sequenceGUI = gui.addFolder('Sequence');
+sequenceGUI.add(sequence, 'step').listen();
+sequenceGUI.add(sequence, 'numSteps').listen();
+sequenceGUI.add(sequence, 'next');
+sequenceGUI.add(sequence, 'prev');
+sequenceGUI.add(sequence, 'save');
+sequenceGUI.add(sequence, 'remove');
+sequenceGUI.open();
