@@ -7,7 +7,7 @@ var Sequence = require('./modules/sequence.js');
 
 // initialize
 var scene = new THREE.Scene();
-scene.background = new THREE.Color( 0x505050 );
+//scene.background = new THREE.Color( 0x505050 );
 
 // room
 camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10 );
@@ -30,21 +30,8 @@ document.body.appendChild( renderer.domElement );
 renderer.vr.enabled = true;
 document.body.appendChild( WEBVR.createButton( renderer ) );
 
-
-//var controls = new THREE.TrackballControls(camera, renderer.domElement);
-//controls.rotateSpeed = 1.0;
-//controls.zoomSpeed = 1.2;
-//controls.panSpeed = 0.8;
-//controls.noZoom = false;
-//controls.noPan = false;
-//controls.staticMoving = true;
-//controls.dynamicDampingFactor = 0.3;
-//controls.keys = [ 65, 83, 68 ];
-
 renderer.setAnimationLoop(() => {
     renderer.render( scene, camera );
-    //ceiling.animate();
-    //controls.update();
 });
 
 // Initialize scene
@@ -53,6 +40,11 @@ var offsetY = -5;
 var offsetZ = 6;
 var ceiling = new Ceiling(scene, 10, 10, 1, 0.1, offsetX, offsetY, offsetZ);
 var sequence = new Sequence(ceiling);
+
+// set up pusher
+var pusher = new Pusher('6f0a8b7c1f634d3907fe', { cluster: 'us2', forceTLS: true });
+var channel = pusher.subscribe('bitf');
+channel.bind('sequence', function(sequence) { ceiling.load(sequence); });
 
 // GUI
 const gui = new dat.GUI();

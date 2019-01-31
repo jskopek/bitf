@@ -5,20 +5,25 @@
   "main": "bitf.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "webpack": "webpack"
+    "webpack": "webpack",
+    "monitor-webpack": "webpack",
+    "server": "nodemon server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dat.gui": "^0.7.5",
+    "dotenv": "^6.2.0",
     "express": "^4.16.4",
     "lodash": "^4.17.11",
+    "pusher": "^2.2.0",
     "three": "^0.100.0",
     "three-orbit-controls": "^82.1.0",
     "three-trackballcontrols": "0.0.7",
     "three-vr": "^0.2.0"
   },
   "devDependencies": {
+    "nodemon": "^1.18.9",
     "webpack": "^4.29.0",
     "webpack-cli": "^3.2.1"
   }

@@ -206,6 +206,9 @@ class Sequence {
         if(this.step >= this.sequence.length - 1) { return; }
         this.step += 1;
         this.ceiling.load(this.sequence[this.step], this.playSpeed);
+        
+        // send to pusher
+        fetch('/push/?sequence=' + encodeURIComponent(JSON.stringify(this.sequence[this.step])));
     }
     prev() {
         if(this.step <= 0) { return; }
