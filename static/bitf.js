@@ -31,16 +31,16 @@ class Panel {
         var opacity = this.generateSequence(this.opacity, opacity, 10);
 
         var isRunning = this.sequence.length ? true : false;
-        this.sequence = _.zip(redSequence, blueSequence, greenSequence, opacity);
+        this.sequence = _.zip(redSequence, greenSequence, blueSequence, opacity);
 
         var totalTime = Math.random() * playSpeed;
         var intervalTime = totalTime / this.sequence.length;
 
         if(!isRunning) {
             this.runSequence(intervalTime, (color) => {
-                this.red = color[0];
-                this.green = color[1];
-                this.blue = color[2];
+                this.red = Math.round(color[0]);
+                this.green = Math.round(color[1]);
+                this.blue = Math.round(color[2]);
                 this.opacity = color[3];
                 this.render()
             });
