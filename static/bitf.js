@@ -162,7 +162,7 @@ class ClickableCeiling extends Ceiling {
 class Sequence {
     constructor(ceiling) {
         this.ceiling = ceiling;
-        this.step = 0;
+        this.step = 1;
         this.numSteps = 0;
 
         this.running = false;
@@ -172,23 +172,27 @@ class Sequence {
         this.playSpeed = 100;
         this.sequence = [];
 
-        try {
-            var sequence = JSON.parse(localStorage.getItem('sequence'));
-            this.load(sequence);
-        } catch {
+        var sequenceStr = localStorage.getItem('sequence');
+        if(sequenceStr) {
+            this.load(JSON.parse(sequenceStr));
         }
     }
     load(sequence) {
         this.sequence = sequence;
-        this.step = 0;
+        this.step = 1;
         this.numSteps = this.sequence.length;
         if(this.sequence.length) {
-            this.ceiling.load(this.sequence[this.step]);
+            this.ceiling.load(this.sequence[this.step - 1]);
         }
     }
     save() {
+        this.sequence[this.step - 1] = ceiling.save();
+        this.storeLocally();
+    }
+    create() {
         this.sequence.push(ceiling.save());
         this.steps += 1;
+        this.step += 1;
         this.numSteps = this.sequence.length;
         this.storeLocally();
     }
@@ -196,24 +200,21 @@ class Sequence {
         localStorage.setItem('sequence', JSON.stringify(this.sequence));
     }
     remove() {
-        if(this.step < 1) { return; }
-        this.sequence.splice(this.step,1);
+        if(this.step <= 1) { return; }
+        this.sequence.splice(this.step - 1,1);
         this.numSteps = this.sequence.length;
         this.storeLocally();
         this.prev();
     }
     next() {
-        if(this.step >= this.sequence.length - 1) { return; }
+        if(this.step >= this.sequence.length) { return; }
         this.step += 1;
-        this.ceiling.load(this.sequence[this.step], this.playSpeed);
-        
-        // send to pusher
-        fetch('/push/?sequence=' + encodeURIComponent(JSON.stringify(this.sequence[this.step])));
+        this.ceiling.load(this.sequence[this.step - 1], this.playSpeed);
     }
     prev() {
-        if(this.step <= 0) { return; }
+        if(this.step <= 1) { return; }
         this.step -= 1;
-        this.ceiling.load(this.sequence[this.step], this.playSpeed);
+        this.ceiling.load(this.sequence[this.step - 1], this.playSpeed);
     }
     play() {
         this.running = true;
@@ -224,8 +225,8 @@ class Sequence {
     }
     run() {
         if(!this.running) { return; }
-        var isFinalStep = this.step == this.sequence.length - 1 ? true : false
-        var isFirstStep = this.step == 0 ? true : false
+        var isFinalStep = this.step == this.sequence.length ? true : false
+        var isFirstStep = this.step == 1 ? true : false
         if(isFirstStep && this.boomerang && !this.directionForward) {
             this.directionForward = true;
         } else if(isFinalStep && this.boomerang && this.directionForward) {
@@ -235,7 +236,7 @@ class Sequence {
         } else if(!isFirstStep && !this.directionForward) {
             this.prev();
         } else if(isFinalStep && this.loop) {
-            this.step = 0;
+            this.step = 1;
         } else {
             this.running = false;
         }
@@ -281,6 +282,7 @@ sequenceGUI.add(sequence, 'numSteps').listen();
 sequenceGUI.add(sequence, 'next');
 sequenceGUI.add(sequence, 'prev');
 sequenceGUI.add(sequence, 'save');
+sequenceGUI.add(sequence, 'create');
 sequenceGUI.add(sequence, 'remove');
 sequenceGUI.add(sequence, 'download');
 sequenceGUI.open();
