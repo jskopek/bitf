@@ -1,9 +1,14 @@
-var Pusher = require('pusher');
 require('dotenv').config()
+const Pusher = require('pusher');
 const express = require('express');
 const app = express()
 const port = 3000
-app.get('/', (req, res) => res.send('hello world'));
+
+app.set('view engine', 'ejs');
+
+app.get('/viewer/', (req, res) => res.render('viewer'));
+app.get('/controller/', (req, res) => res.render('controller'));
+app.get('/', (req, res) => res.render('index'));
 
 app.get('/push/', (req, res) => {
     var pusher = new Pusher({
