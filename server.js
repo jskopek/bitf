@@ -2,7 +2,7 @@ require('dotenv').config()
 const Pusher = require('pusher');
 const express = require('express');
 const app = express()
-const PORT = process.env.PORT || 3000
+const port = process.env.PORT || 3000
 
 app.set('view engine', 'ejs');
 
