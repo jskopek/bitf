@@ -115,17 +115,27 @@ class Ceiling {
 }
 
 class ClickableCeiling extends Ceiling {
+    getPanelAtCoords(x, y) {
+        var col = Math.floor(x / (this.size + this.gap));
+        var row = Math.floor(y / (this.size + this.gap));
+        try {
+            return this.panels[row][col];
+        } catch {
+            return false;
+        }
+    }
     constructor(canvas, rows, cols, size, gap, color, opacity) {
         super(canvas, rows, cols, size, gap);
-        this.clickedPanels = false;
-        this.color = color || [40,100,105];
+        this.color = color || [40,180,105];
         this.opacity = opacity || 1;
 
-        this.canvas.addEventListener('mousemove', (e) => {
+
+        // function that modifies panel color based on touch location
+        var setPanelColor = (canvasX, canvasY) => {
             if(!this.clickedPanels) { return; }
 
-            var col = Math.floor(e.offsetX / (this.size + this.gap));
-            var row = Math.floor(e.offsetY / (this.size + this.gap));
+            var col = Math.floor(canvasX / (this.size + this.gap));
+            var row = Math.floor(canvasY / (this.size + this.gap));
 
             // check if panel has already been clicked; if so, don't run again
             var key = `${col}-${row}`
@@ -137,25 +147,47 @@ class ClickableCeiling extends Ceiling {
 
             var panel = this.panels[row][col];
 
-            console.log('panel.SetColor', this.color);
             panel.setColor(...this.color, this.opacity);
+
+        }
+        // handle mouse events
+        this.canvas.addEventListener('mousedown', (e) => { this.clickedPanels = {}; });
+        this.canvas.addEventListener('mouseup', (e) => { this.clickedPanels = false });
+        this.canvas.addEventListener('mousemove', (e) => { 
+            if(!this.clickedPanels) { return; }
+            var panel = this.getPanelAtCoords(e.offsetX, e.offsetY);
+            if(panel && !this.clickedPanels[`${panel.x}-${panel.y}`]) {
+                this.clickedPanels[`${panel.x}-${panel.y}`] = true;
+                panel.setColor(...this.color, this.opacity);
+            }
         });
 
-        this.canvas.addEventListener('mousedown', (e) => {
-            this.clickedPanels = {};
-        });
-        this.canvas.addEventListener('mouseup', (e) => {
-            this.clickedPanels = false;
+        // handle touch events
+        this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); this.clickedPanels = {}; });
+        this.canvas.addEventListener('touchend', (e) => { this.clickedPanels = false });
+        this.canvas.addEventListener('touchmove', (e) => {
+            if(!this.clickedPanels) { return; }
+            var panel = this.getPanelAtCoords(e.pageX, e.pageY);
+            if(panel && !this.clickedPanels[`${panel.x}-${panel.y}`]) {
+                this.clickedPanels[`${panel.x}-${panel.y}`] = true;
+                panel.setColor(...this.color, this.opacity);
+            }
         });
     }
     sample() {
         this.canvas.addEventListener('click', (e) => {
-            var col = Math.floor(e.offsetX / (this.size + this.gap));
-            var row = Math.floor(e.offsetY / (this.size + this.gap));
-            var panel = this.panels[row][col];
+            var panel = this.getPanelAtCoords(e.offsetX, e.offsetY);
+            if(!panel) { return; }
             this.color = [panel.red,panel.green,panel.blue];
             this.opacity = panel.opacity
         }, {once: true});
+        this.canvas.addEventListener('touchstart', (e) => {
+            var panel = this.getPanelAtCoords(e.pageX, e.pageY);
+            if(!panel) { return; }
+            this.color = [panel.red,panel.green,panel.blue];
+            this.opacity = panel.opacity
+        }, {once: true});
+
     }
 }
 
