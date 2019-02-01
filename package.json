@@ -6,8 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "webpack": "webpack",
-    "monitor-webpack": "webpack",
-    "server": "nodemon server.js"
+    "monitor-webpack": "webpack --watch",
+    "server": "nodemon server.js",
+    "heroku-postbuild": "webpack"
   },
   "author": "",
   "license": "ISC",

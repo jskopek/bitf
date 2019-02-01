@@ -9,6 +9,6 @@ module.exports = {
         path: path.resolve(__dirname, 'static', 'dist'),
         filename: '[name].bundle.js'
     },
-    mode: 'development',
-    watch: true
+    mode: 'development'
+    //watch: true
 };
