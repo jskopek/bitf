@@ -111,6 +111,8 @@ class Ceiling {
                 i++;
             }
         }
+        // send to pusher
+        fetch('/push/?sequence=' + encodeURIComponent(JSON.stringify(values)));
     }
 }
 
