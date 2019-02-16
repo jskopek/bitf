@@ -203,7 +203,7 @@ class Sequence {
         this.loop = false;
         this.boomerang = false;
         this.directionForward = true;
-        this.playSpeed = 100;
+        this.playSpeed = 1000;
         this.sequence = [];
 
         var sequenceStr = localStorage.getItem('sequence');
