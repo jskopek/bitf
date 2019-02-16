@@ -42,7 +42,7 @@ var ceiling = new Ceiling(scene, 10, 10, 1, 0.1, offsetX, offsetY, offsetZ);
 var sequence = new Sequence(ceiling);
 
 // set up pusher
-var pusher = new Pusher('6f0a8b7c1f634d3907fe', { cluster: 'us2', forceTLS: true });
+var pusher = new Pusher(window.key, { cluster: window.cluster, forceTLS: true });
 var channel = pusher.subscribe('bitf');
 channel.bind('sequence', function(sequence) { ceiling.load(sequence); });
 

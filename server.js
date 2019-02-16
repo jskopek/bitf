@@ -6,7 +6,12 @@ const port = process.env.PORT || 3000
 
 app.set('view engine', 'ejs');
 
-app.get('/viewer/', (req, res) => res.render('viewer'));
+app.get('/viewer/', (req, res) => {
+    res.render('viewer', {
+        'key': process.env.key,
+        'cluster': process.env.cluster
+    });
+});
 app.get('/controller/', (req, res) => res.render('controller'));
 app.get('/', (req, res) => res.render('index'));
 
