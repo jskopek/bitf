@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var dat = require('dat.gui');
 var {Ceiling, ClickableCeiling} = require('./ceiling.js');
+var {Panel, PanelManager} = require('./panel.js');
 var Sequence = require('./sequence.js');
 
 // initialize
@@ -11,28 +12,13 @@ canvas.height = window.innerHeight;
 var LEDSize = Math.min(canvas.width, canvas.height) / 10;
 var ceiling = new ClickableCeiling(canvas, 10, 10, LEDSize, 2);
 
-
-// send ceiling render updates to viewer
-class Remote {
-    /* The remote LED controller (e.g. a Raspberry PI) */
-    constructor(url, rows, cols, offsetRow, offsetCol) {
-        this.url = url
-        this.rows = rows;
-        this.cols = cols;
-        this.offsetRow = offsetRow;
-        this.offsetCol = offsetCol;
-    }
-    send(values) {
-        values = _.map(values, (val) => { return `rgb(${val[0]},${val[1]},${val[2]})`; });
-        fetch(this.url + '/push/?colors=' + encodeURIComponent(JSON.stringify(values)));
-    }
-}
-
-
-var rem = new Remote('http://localhost:3003');
-ceiling.on('render', (values) => {
-    rem.send(values);
-});
+// initialize remote panels
+var panelManager = new PanelManager();
+panelManager.add(new Panel('http://localhost:3003', 0, 0));
+panelManager.add(new Panel('http://localhost:3004', 0, 5));
+panelManager.add(new Panel('http://localhost:3005', 5, 0));
+panelManager.add(new Panel('http://localhost:3006', 5, 5));
+ceiling.on('render', (values) => { panelManager.send(ceiling); })
 
 var sequence = new Sequence(ceiling);
 

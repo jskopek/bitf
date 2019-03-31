@@ -19,9 +19,14 @@ class LED {
         this.ctx.fillStyle = `rgba(${this.red},${this.green},${this.blue},${this.opacity})`;
         this.ctx.fill();
     }
-    setColor(red, green, blue, opacity, playSpeed) {
-        if(!playSpeed) { playSpeed = 100; }
-
+    setColor(red, green, blue, opacity) {
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
+        this.opacity = opacity;
+        this.render()
+    }
+    setColorSequence(red, green, blue, opacity, playSpeed) {
         var redSequence = this.generateSequence(this.red, red, 10);
         var greenSequence = this.generateSequence(this.green, green, 10);
         var blueSequence = this.generateSequence(this.blue, blue, 10);
@@ -42,7 +47,6 @@ class LED {
                 this.render()
             });
         }
-
     }
     save() {
         return [this.red, this.green, this.blue, this.opacity];
@@ -65,6 +69,9 @@ class LED {
             steps.push(val);
         }
         return steps;
+    }
+    colorStr() {
+        return `rgb(${this.red},${this.green},${this.blue})`
     }
 }
 module.exports = LED;
