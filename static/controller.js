@@ -80,4 +80,22 @@ window.addEventListener("drop", (e) => {
 },false);
 
 
+// look for commands from launchpad socket server
+var socket = io('http://localhost:4000');
+socket.on('sequence', (sequenceData) => { sequence.load(sequenceData); });
+socket.on('configuration', (configData) => {
+    console.log(configData);
+    if(configData.type == 'microphone') {
+        sequence.stop();
+        microphone.initializeMeter();
+        microphone.sampling = true;
+        microphone.sampleRate = configData.level * 500;
+    } else if(configData.type == 'sequencer') {
+        microphone.sampling = false;
+        sequence.play();
+        sequence.playSpeed = configData.level * 1500;
+    }
+});
+
+
 
