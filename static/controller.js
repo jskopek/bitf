@@ -30,12 +30,16 @@ var sequence = new Sequence(ceiling);
 
 // initialize microphone
 var microphone = new Microphone(100);
+
+// modify sequence on microphone changes
 microphone.on('volume', (volume) => {
-	var mod = Math.min(volume * 3, 1); // multiply volume by 3, but make sure its never over 1.0
-	console.log(mod);
-	var sequenceStep = Math.floor((sequence.numSteps - 1) * mod)
-	ceiling.render(sequence.sequence[sequenceStep]);
+    if(!microphone.visualizeAbsolute) { return; }
+    var sequenceStep = Math.floor((sequence.numSteps - 1) * volume)
+    ceiling.render(sequence.sequence[sequenceStep]);
 });
+microphone.on('volumeIncreased', (volume) => { if(!microphone.visualizeAbsolute) { sequence.next(); }});
+microphone.on('volumeDecreased', (volume) => { if(!microphone.visualizeAbsolute) { sequence.prev(); }});
+
 
 // GUI
 const gui = new dat.GUI();
