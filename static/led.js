@@ -1,4 +1,4 @@
-class Panel {
+class LED {
     constructor(canvas, x, y, size) {
         this.ctx = canvas.getContext('2d');
         this.x = x;
@@ -67,4 +67,4 @@ class Panel {
         return steps;
     }
 }
-module.exports = Panel;
+module.exports = LED;

@@ -8,8 +8,8 @@ var canvas = document.querySelector('#test');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-var panelSize = Math.min(canvas.width, canvas.height) / 10;
-var ceiling = new ClickableCeiling(canvas, 10, 10, panelSize, 2);
+var LEDSize = Math.min(canvas.width, canvas.height) / 10;
+var ceiling = new ClickableCeiling(canvas, 10, 10, LEDSize, 2);
 
 
 // send ceiling render updates to viewer
