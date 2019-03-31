@@ -47,9 +47,6 @@ class Panel {
     save() {
         return [this.red, this.green, this.blue, this.opacity];
     }
-    load(values, playSpeed) {
-        this.setColor(values[0], values[1], values[2], values[3], playSpeed);
-    }
     runSequence(intervalTime, action) {
         action(this.sequence[0]);
         this.sequence.splice(0,1);

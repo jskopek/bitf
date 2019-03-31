@@ -21,7 +21,7 @@ class Sequence {
         this.step = 1;
         this.numSteps = this.sequence.length;
         if(this.sequence.length) {
-            this.ceiling.load(this.sequence[this.step - 1]);
+            this.ceiling.render(this.sequence[this.step - 1]);
         }
     }
     save() {
@@ -48,12 +48,12 @@ class Sequence {
     next() {
         if(this.step >= this.sequence.length) { return; }
         this.step += 1;
-        this.ceiling.load(this.sequence[this.step - 1], this.playSpeed);
+        this.ceiling.render(this.sequence[this.step - 1], this.playSpeed);
     }
     prev() {
         if(this.step <= 1) { return; }
         this.step -= 1;
-        this.ceiling.load(this.sequence[this.step - 1], this.playSpeed);
+        this.ceiling.render(this.sequence[this.step - 1], this.playSpeed);
     }
     play() {
         this.running = true;

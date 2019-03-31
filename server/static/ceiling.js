@@ -1,7 +1,9 @@
+const EventEmitter = require( 'events' );
 var Panel = require('./panel.js');
 
-class Ceiling {
+class Ceiling extends EventEmitter {
     constructor(canvas, rows, cols, size, gap) {
+        super();
         this.canvas = canvas;
         this.rows = rows;
         this.cols = cols;
@@ -29,14 +31,16 @@ class Ceiling {
         }
         return values;
     }
-    load(values, playSpeed) {
+    render(values, playSpeed) {
         var i = 0;
         for(var row = 0; row < this.rows; row++) {
             for(var col = 0; col < this.cols; col++) {
-                this.panels[row][col].load(values[i], playSpeed);
+                var color = values[i];
+                this.panels[row][col].setColor(color[0], color[1], color[2], color[3], playSpeed);
                 i++;
             }
         }
+        this.emit('render', values);
         // send to pusher
         //fetch('/push/?sequence=' + encodeURIComponent(JSON.stringify(values)));
     }
