@@ -5,11 +5,6 @@ var {Panel, PanelManager} = require('./panel.js');
 var Sequence = require('./sequence.js');
 var Microphone = require('./microphone.js');
 
-var socket = io('http://localhost:4000');
-socket.on('sequence', (sequenceData) => {
-    sequence.load(sequenceData);
-});
-
 // initialize
 var canvas = document.querySelector('#test');
 canvas.width = window.innerWidth;
@@ -60,14 +55,24 @@ sequenceGUI.add(sequence, 'create');
 sequenceGUI.add(sequence, 'remove');
 sequenceGUI.add(sequence, 'download');
 sequenceGUI.open();
+
 var sequenceRunnerGUI = gui.addFolder('Sequence Runner');
 sequenceRunnerGUI.add(sequence, 'play');
 sequenceRunnerGUI.add(sequence, 'stop');
 sequenceRunnerGUI.add(sequence, 'loop')
 sequenceRunnerGUI.add(sequence, 'boomerang')
 sequenceRunnerGUI.add(sequence, 'directionForward').listen();
-sequenceRunnerGUI.add(sequence, 'playSpeed', 100, 3000)
+sequenceRunnerGUI.add(sequence, 'playSpeed', 100, 3000).listen();
 sequenceRunnerGUI.open();
+
+
+var microphoneGUI = gui.addFolder('Microphone Input');
+microphoneGUI.add(microphone, 'initializeMeter');
+microphoneGUI.add(microphone, 'sampling').listen();
+microphoneGUI.add(microphone, 'sampleRate', 20, 500).listen();
+microphoneGUI.add(microphone, 'multiplier', 0.2, 10).listen();
+microphoneGUI.add(microphone, 'visualizeAbsolute');
+microphoneGUI.open();
 
 // load dropped sequences
 window.addEventListener("dragover", (e) => { e.preventDefault(); },false);

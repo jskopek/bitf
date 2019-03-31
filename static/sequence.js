@@ -5,10 +5,10 @@ class Sequence {
         this.numSteps = 0;
 
         this.running = false;
-        this.loop = false;
-        this.boomerang = false;
+        this.loop = true;
+        this.boomerang = true;
         this.directionForward = true;
-        this.playSpeed = 1000;
+        this.playSpeed = 150;
         this.sequence = [];
 
         var sequenceStr = localStorage.getItem('sequence');
@@ -56,6 +56,7 @@ class Sequence {
         this.ceiling.render(this.sequence[this.step - 1], this.playSpeed);
     }
     play() {
+        if(this.running) { return; }
         this.running = true;
         this.run();
     }
