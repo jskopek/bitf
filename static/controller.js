@@ -5,6 +5,11 @@ var {Panel, PanelManager} = require('./panel.js');
 var Sequence = require('./sequence.js');
 var Microphone = require('./microphone.js');
 
+var socket = io('http://localhost:4000');
+socket.on('sequence', (sequenceData) => {
+    sequence.load(sequenceData);
+});
+
 // initialize
 var canvas = document.querySelector('#test');
 canvas.width = window.innerWidth;
@@ -73,3 +78,6 @@ window.addEventListener("drop", (e) => {
     reader.readAsText(file);
 
 },false);
+
+
+
