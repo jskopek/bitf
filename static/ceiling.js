@@ -123,6 +123,14 @@ class ClickableCeiling extends Ceiling {
         }, {once: true});
 
     }
+    fill() {
+        this.leds.forEach((row) => {
+            row.forEach((led) => {
+                console.log(led);
+                led.setColor(...this.color, this.opacity); 
+            });
+        });
+    }
 }
 
 module.exports = { Ceiling, ClickableCeiling };

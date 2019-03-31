@@ -47,6 +47,7 @@ var styleGUI = gui.addFolder('Style');
 styleGUI.addColor(ceiling, 'color').listen();
 styleGUI.add(ceiling, 'opacity', 0, 1).listen();
 styleGUI.add(ceiling, 'sample');
+styleGUI.add(ceiling, 'fill');
 styleGUI.open();
 
 var sequenceGUI = gui.addFolder('Sequence');
