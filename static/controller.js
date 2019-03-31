@@ -3,6 +3,7 @@ var dat = require('dat.gui');
 var {Ceiling, ClickableCeiling} = require('./ceiling.js');
 var {Panel, PanelManager} = require('./panel.js');
 var Sequence = require('./sequence.js');
+var Microphone = require('./microphone.js');
 
 // initialize
 var canvas = document.querySelector('#test');
@@ -21,6 +22,15 @@ panelManager.add(new Panel('http://localhost:3006', 5, 5));
 ceiling.on('render', (values) => { panelManager.send(ceiling); })
 
 var sequence = new Sequence(ceiling);
+
+// initialize microphone
+var microphone = new Microphone(100);
+microphone.on('volume', (volume) => {
+	var mod = Math.min(volume * 3, 1); // multiply volume by 3, but make sure its never over 1.0
+	console.log(mod);
+	var sequenceStep = Math.floor((sequence.numSteps - 1) * mod)
+	ceiling.render(sequence.sequence[sequenceStep]);
+});
 
 // GUI
 const gui = new dat.GUI();

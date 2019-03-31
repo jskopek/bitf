@@ -25,11 +25,11 @@ class Sequence {
         }
     }
     save() {
-        this.sequence[this.step - 1] = ceiling.save();
+        this.sequence[this.step - 1] = this.ceiling.save();
         this.storeLocally();
     }
     create() {
-        this.sequence.push(ceiling.save());
+        this.sequence.push(this.ceiling.save());
         this.steps += 1;
         this.step += 1;
         this.numSteps = this.sequence.length;
