@@ -91,8 +91,8 @@ window.addEventListener("drop", (e) => {
 
 
 // look for commands from launchpad socket server
-var socket = io('http://localhost:4000');
-socket.on('sequence', (sequenceData) => { sequence.load(sequenceData); });
+var socket = io();
+socket.on('sequence', (sequenceData) => { console.log(sequenceData); sequence.load(sequenceData); });
 socket.on('configuration', (configData) => {
     console.log(configData);
     if(configData.type == 'microphone') {
