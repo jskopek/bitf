@@ -6,12 +6,6 @@ var bonjour = require('bonjour')();
 
 var LaunchpadController = require('./modules/launchpad.js');
 
-app.use(express.static(__dirname));
-app.get('/', (req, res) => { res.sendFile('index.html'); });
-var port = process.argv[2] || 3000;
-
-server.listen(port, () => console.log(`Controller listening on port ${port}!`));
-
 // initialize socket server
 var socket = undefined;
 io.on('connection', (newSocket) => { socket = newSocket; });
@@ -28,11 +22,24 @@ launchpad.on('configuration', (configuration) => {
 });
 
 // monitor for new panels being broadcast on bonjour
+var panels = [];
 var browser = bonjour.find({type: 'panel'}, (service) => {
-    var address = service.referer.address;
-    var port = service.port;
-    var offsetRow = parseInt(service.txt.offsetrow) || 0;
-    var offsetCol = parseInt(service.txt.offsetcol) || 0;
-    console.log('Found Panel!', address, port, offsetRow, offsetCol);
-    if(socket) { socket.emit('panel', address, port, offsetRow, offsetCol); }
+    var panelData = {
+        'address': service.referer.address,
+        'port': service.port,
+        'offsetRow': parseInt(service.txt.offsetrow) || 0,
+        'offsetCol': parseInt(service.txt.offsetcol) || 0
+    };
+    panels.push(panelData);
+    console.log('Found Panel!', panelData);
+    if(socket) { socket.emit('panel', panelData); }
 });
+
+// initialize web server
+app.set('view engine', 'ejs')
+app.use(express.static(__dirname));
+app.get('/', (req, res) => { res.render('index', {'panels': panels}); });
+var port = process.argv[2] || 3000;
+server.listen(port, () => console.log(`Controller listening on port ${port}!`));
+
+

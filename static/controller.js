@@ -5,7 +5,7 @@ var {Panel, PanelManager} = require('./panel.js');
 var Sequence = require('./sequence.js');
 var Microphone = require('./microphone.js');
 
-// initialize
+// initialize canvas, ceiling, and sequencer
 var canvas = document.querySelector('#test');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -15,7 +15,11 @@ var ceiling = new ClickableCeiling(canvas, 10, 10, LEDSize, 2);
 
 var sequence = new Sequence(ceiling);
 
-// initialize microphone
+// initialize socket io
+var socket = io(); 
+
+
+// Microphone
 var microphone = new Microphone(100);
 
 // modify sequence on microphone changes
@@ -57,7 +61,6 @@ sequenceRunnerGUI.add(sequence, 'directionForward').listen();
 sequenceRunnerGUI.add(sequence, 'playSpeed', 100, 3000).listen();
 sequenceRunnerGUI.open();
 
-
 var microphoneGUI = gui.addFolder('Microphone Input');
 microphoneGUI.add(microphone, 'initializeMeter');
 microphoneGUI.add(microphone, 'sampling').listen();
@@ -81,18 +84,17 @@ window.addEventListener("drop", (e) => {
 
 },false);
 
-// initialize remote panels
+// initialize remote panel manager
 var panelManager = new PanelManager();
-//panelManager.add(new Panel('http://localhost:3003', 0, 0));
-//panelManager.add(new Panel('http://localhost:3004', 0, 5));
-//panelManager.add(new Panel('http://localhost:3005', 5, 0));
-//panelManager.add(new Panel('http://localhost:3006', 5, 5));
 ceiling.on('render', (values) => { panelManager.send(ceiling); })
+window.panels.forEach((panelData) => {
+    panelManager.add(new Panel(`http://${panelData.address}:${panelData.port}`, panelData.offsetRow, panelData.offsetCol));
+});
+socket.on('panel', (panelData) => {
+    panelManager.add(new Panel(`http://${panelData.address}:${panelData.port}`, panelData.offsetRow, panelData.offsetCol));
+});
 
-
-
-// look for commands from launchpad socket server
-var socket = io();
+// monitor for launchpad commands
 socket.on('sequence', (sequenceData) => { console.log(sequenceData); sequence.load(sequenceData); });
 socket.on('configuration', (configData) => {
     console.log(configData);
@@ -107,6 +109,4 @@ socket.on('configuration', (configData) => {
         sequence.playSpeed = configData.level * 1500;
     }
 });
-socket.on('panel', (address, port, offsetRow, offsetCol) => {
-    panelManager.add(new Panel(`http://${address}:${port}`, offsetRow, offsetCol));
-});
+
