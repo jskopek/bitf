@@ -2,6 +2,8 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
+var bonjour = require('bonjour')();
+
 var LaunchpadController = require('./modules/launchpad.js');
 
 app.use(express.static(__dirname));
@@ -23,4 +25,14 @@ launchpad.on('sequence', (sequence, sequenceFilename) => {
 launchpad.on('configuration', (configuration) => {
     console.log('launchpad.configuration', configuration);
     if(socket) { socket.emit('configuration', configuration); }
+});
+
+// monitor for new panels being broadcast on bonjour
+var browser = bonjour.find({type: 'panel'}, (service) => {
+    var address = service.referer.address;
+    var port = service.port;
+    var offsetRow = parseInt(service.txt.offsetrow) || 0;
+    var offsetCol = parseInt(service.txt.offsetcol) || 0;
+    console.log('Found Panel!', address, port, offsetRow, offsetCol);
+    if(socket) { socket.emit('panel', address, port, offsetRow, offsetCol); }
 });

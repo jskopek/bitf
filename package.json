@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bonjour": "^3.5.0",
     "dat.gui": "^0.7.5",
     "dotenv": "^6.2.0",
     "ejs": "^2.6.1",

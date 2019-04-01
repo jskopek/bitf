@@ -13,14 +13,6 @@ canvas.height = window.innerHeight;
 var LEDSize = Math.min(canvas.width, canvas.height) / 10;
 var ceiling = new ClickableCeiling(canvas, 10, 10, LEDSize, 2);
 
-// initialize remote panels
-var panelManager = new PanelManager();
-panelManager.add(new Panel('http://localhost:3003', 0, 0));
-panelManager.add(new Panel('http://localhost:3004', 0, 5));
-panelManager.add(new Panel('http://localhost:3005', 5, 0));
-panelManager.add(new Panel('http://localhost:3006', 5, 5));
-ceiling.on('render', (values) => { panelManager.send(ceiling); })
-
 var sequence = new Sequence(ceiling);
 
 // initialize microphone
@@ -89,6 +81,15 @@ window.addEventListener("drop", (e) => {
 
 },false);
 
+// initialize remote panels
+var panelManager = new PanelManager();
+//panelManager.add(new Panel('http://localhost:3003', 0, 0));
+//panelManager.add(new Panel('http://localhost:3004', 0, 5));
+//panelManager.add(new Panel('http://localhost:3005', 5, 0));
+//panelManager.add(new Panel('http://localhost:3006', 5, 5));
+ceiling.on('render', (values) => { panelManager.send(ceiling); })
+
+
 
 // look for commands from launchpad socket server
 var socket = io();
@@ -106,6 +107,6 @@ socket.on('configuration', (configData) => {
         sequence.playSpeed = configData.level * 1500;
     }
 });
-
-
-
+socket.on('panel', (address, port, offsetRow, offsetCol) => {
+    panelManager.add(new Panel(`http://${address}:${port}`, offsetRow, offsetCol));
+});
