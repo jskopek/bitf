@@ -1,67 +1,28 @@
-var _ = require('lodash');
 var dat = require('dat.gui');
 var {Ceiling, ClickableCeiling} = require('./ceiling.js');
-//var BonjourPanel = require('../modules/bonjourPanel.js');
-//var BonjourPanelManager = require('../modules/bonjourPanelManager.js');
 var Sequence = require('./sequence.js');
-var Microphone = require('./microphone.js');
 
 // initialize canvas, ceiling, and sequencer
 var canvas = document.querySelector('#test');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-var LEDSize = Math.min(canvas.width, canvas.height) / 10;
-var ceiling = new ClickableCeiling(canvas, 10, 10, LEDSize, 2);
+var LEDSize = Math.min(canvas.width, canvas.height) / 4;
+var ceiling = new ClickableCeiling(canvas, 2, 4, LEDSize, 2);
 
 var sequence = new Sequence(ceiling);
 
+// ---------- Socket Server -----------
 // initialize socket io
 var socket = io(); 
 
-
-// Microphone
-var microphone = new Microphone(100);
-
-// modify sequence on microphone changes
-microphone.on('volume', (volume) => {
-    if(!microphone.visualizeAbsolute) { return; }
-    var sequenceStep = Math.floor((sequence.numSteps - 1) * volume)
-    ceiling.render(sequence.sequence[sequenceStep]);
-});
-microphone.on('volumeIncreased', (volume) => { if(!microphone.visualizeAbsolute) { sequence.next(); }});
-microphone.on('volumeDecreased', (volume) => { if(!microphone.visualizeAbsolute) { sequence.prev(); }});
-
-
-// load dropped sequences
-window.addEventListener("dragover", (e) => { e.preventDefault(); },false);
-window.addEventListener("drop", (e) => {
-    e.preventDefault();
-
-    var file = e.dataTransfer.items[0].getAsFile();
-    var reader = new FileReader();
-    reader.onload = (evt) => {
-        var droppedSequence = JSON.parse(evt.target.result);
-        sequence.load(droppedSequence);
-    }
-    reader.readAsText(file);
-
-},false);
-
-//// initialize remote panel manager
-//var panelManager = new BonjourPanelManager();
-//ceiling.on('render', (values) => { panelManager.send(ceiling); })
-//window.panels.forEach((panelData) => {
-//    panelManager.add(new BonjourPanel(`http://${panelData.address}:${panelData.port}`, panelData.offsetRow, panelData.offsetCol));
-//});
-//socket.on('panel', (panelData) => {
-//    panelManager.add(new BonjourPanel(`http://${panelData.address}:${panelData.port}`, panelData.offsetRow, panelData.offsetCol));
-//});
-
-// monitor for launchpad commands
+// monitor for launchpad sequence change
 socket.on('sequence', (sequenceData) => { console.log(sequenceData); sequence.load(sequenceData); });
+
+// monitor for launchpad microphone/sequencer changes
 socket.on('configuration', (configData) => {
     console.log(configData);
+    if(!window.microphone) { return; }
     if(configData.type == 'microphone') {
         sequence.stop();
         microphone.initializeMeter();
@@ -75,7 +36,46 @@ socket.on('configuration', (configData) => {
 });
 
 
-// GUI
+// send ceiling updates to server
+ceiling.on('render', (values) => {
+    socket.emit('render', values);
+    console.log('render', values);
+});
+// ---------- End Socket Server -----------
+
+// ----------- Microphone -------------
+var Microphone = require('./microphone.js');
+var microphone = new Microphone(100);
+
+// modify sequence on microphone changes
+microphone.on('volume', (volume) => {
+    if(!microphone.visualizeAbsolute) { return; }
+    var sequenceStep = Math.floor((sequence.numSteps - 1) * volume)
+    ceiling.render(sequence.sequence[sequenceStep]);
+});
+microphone.on('volumeIncreased', (volume) => { if(!microphone.visualizeAbsolute) { sequence.next(); }});
+microphone.on('volumeDecreased', (volume) => { if(!microphone.visualizeAbsolute) { sequence.prev(); }});
+// ----------- End Microphone -------------
+
+
+// ------------ Load Dropped Sequences -------------
+window.addEventListener("dragover", (e) => { e.preventDefault(); },false);
+window.addEventListener("drop", (e) => {
+    e.preventDefault();
+
+    var file = e.dataTransfer.items[0].getAsFile();
+    var reader = new FileReader();
+    reader.onload = (evt) => {
+        var droppedSequence = JSON.parse(evt.target.result);
+        sequence.load(droppedSequence);
+    }
+    reader.readAsText(file);
+
+},false);
+// ------------ End Load Dropped Sequences -------------
+
+
+// ------------- GUI -----------------
 const gui = new dat.GUI();
 var styleGUI = gui.addFolder('Style');
 styleGUI.addColor(ceiling, 'color').listen();
@@ -111,5 +111,4 @@ microphoneGUI.add(microphone, 'sampleRate', 20, 500).listen();
 microphoneGUI.add(microphone, 'multiplier', 0.2, 10).listen();
 microphoneGUI.add(microphone, 'visualizeAbsolute');
 microphoneGUI.open();
-
-
+// ------------- End GUI -----------------

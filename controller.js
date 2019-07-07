@@ -1,25 +1,38 @@
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
-var io = require('socket.io')(server);
-
-var LaunchpadController = require('./modules/launchpad.js');
 
 // initialize socket server
+var io = require('socket.io')(server);
 var socket = undefined;
-io.on('connection', (newSocket) => { socket = newSocket; });
+//io.on('connection', (newSocket) => { 
+//    socket = newSocket; 
+//    socket.on('render', (values) => {
+//        console.log('render received!', values);
+//    });
+//});
 
-// initialize launchpad controller
-var launchpad = new LaunchpadController('./sequences/');
-launchpad.on('sequence', (sequence, sequenceFilename) => {
-    console.log('launchpad.sequence', sequenceFilename);
-    if(socket) { socket.emit('sequence', sequence); }
-});
-launchpad.on('configuration', (configuration) => {
-    console.log('launchpad.configuration', configuration);
-    if(socket) { socket.emit('configuration', configuration); }
+// initialize bonjour panel manager
+var {BonjourPanelManager} = require('./modules/bonjourPanelManager.js');
+var panelManager = new BonjourPanelManager();
+io.on('connection', (newSocket) => { 
+    newSocket.on('render', (ledMatrix) => {
+        panelManager.send(ledMatrix);
+    });
 });
 
+//// initialize launchpad controller
+//var LaunchpadController = require('./modules/launchpad.js');
+//var launchpad = new LaunchpadController('./sequences/');
+//launchpad.on('sequence', (sequence, sequenceFilename) => {
+//    console.log('launchpad.sequence', sequenceFilename);
+//    if(socket) { socket.emit('sequence', sequence); }
+//});
+//launchpad.on('configuration', (configuration) => {
+//    console.log('launchpad.configuration', configuration);
+//    if(socket) { socket.emit('configuration', configuration); }
+//});
+//
 //var BonjourPanelFinder = require('./modules/bonjourPanelFinder.js');
 //var bonjourPanels = new BonjourPanelFinder(socket);
 

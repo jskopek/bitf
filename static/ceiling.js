@@ -32,6 +32,20 @@ class Ceiling extends EventEmitter {
         }
         return values;
     }
+    valuesToMatrix(values) {
+        // takes a flat array of values (e.g. [1,2,3,4,5,6]) and converts to a matrix of row/col values based on ceiling
+        // dimensions (e..g [[1,2,3],[4,5,6]])
+        var matrix = []
+        var i = 0;
+        for(var row = 0; row < this.rows; row++) {
+            matrix.push([]);
+            for(var col = 0; col < this.cols; col++) {
+                matrix[row].push(values[i]);
+                i++;
+            }
+        }
+        return matrix
+    }
     render(values, playSpeed) {
         var i = 0;
         for(var row = 0; row < this.rows; row++) {
@@ -41,7 +55,14 @@ class Ceiling extends EventEmitter {
                 i++;
             }
         }
-        this.emit('render', values);
+
+        //this.emit('render', values);
+
+        console.log('ledMatrix', this.valuesToMatrix(values));
+        this.emit('render', this.valuesToMatrix(values));
+
+
+
         // send to pusher
         //fetch('/push/?sequence=' + encodeURIComponent(JSON.stringify(values)));
     }

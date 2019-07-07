@@ -73,5 +73,8 @@ class LED {
     colorStr() {
         return `rgb(${this.red},${this.green},${this.blue})`
     }
+    colorArray() {
+        return [this.red, this.green, this.blue];
+    }
 }
 module.exports = LED;
