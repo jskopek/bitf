@@ -20,13 +20,13 @@ launchpad.on('configuration', (configuration) => {
     if(socket) { socket.emit('configuration', configuration); }
 });
 
-var BonjourPanelFinder = require('./modules/bonjourPanelFinder.js');
-var bonjourPanels = new BonjourPanelFinder(socket);
+//var BonjourPanelFinder = require('./modules/bonjourPanelFinder.js');
+//var bonjourPanels = new BonjourPanelFinder(socket);
 
 // initialize web server
 app.set('view engine', 'ejs')
 app.use(express.static(__dirname));
-app.get('/', (req, res) => { res.render('index', {'panels': bonjourPanels.panels}); });
+app.get('/', (req, res) => { res.render('index'); });
 var port = process.argv[2] || 3000;
 server.listen(port, () => console.log(`Controller listening on port ${port}!`));
 
