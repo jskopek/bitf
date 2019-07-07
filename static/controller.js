@@ -1,7 +1,8 @@
 var _ = require('lodash');
 var dat = require('dat.gui');
 var {Ceiling, ClickableCeiling} = require('./ceiling.js');
-var {Panel, PanelManager} = require('./panel.js');
+var BonjourPanel = require('../modules/bonjourPanel.js');
+var BonjourPanelManager = require('../modules/bonjourPanelManager.js');
 var Sequence = require('./sequence.js');
 var Microphone = require('./microphone.js');
 
@@ -85,13 +86,13 @@ window.addEventListener("drop", (e) => {
 },false);
 
 // initialize remote panel manager
-var panelManager = new PanelManager();
+var panelManager = new BonjourPanelManager();
 ceiling.on('render', (values) => { panelManager.send(ceiling); })
 window.panels.forEach((panelData) => {
-    panelManager.add(new Panel(`http://${panelData.address}:${panelData.port}`, panelData.offsetRow, panelData.offsetCol));
+    panelManager.add(new BonjourPanel(`http://${panelData.address}:${panelData.port}`, panelData.offsetRow, panelData.offsetCol));
 });
 socket.on('panel', (panelData) => {
-    panelManager.add(new Panel(`http://${panelData.address}:${panelData.port}`, panelData.offsetRow, panelData.offsetCol));
+    panelManager.add(new BonjourPanel(`http://${panelData.address}:${panelData.port}`, panelData.offsetRow, panelData.offsetCol));
 });
 
 // monitor for launchpad commands

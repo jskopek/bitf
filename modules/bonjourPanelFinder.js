@@ -2,6 +2,8 @@ var bonjour = require('bonjour')();
 
 class BonjourPanelFinder {
     // monitor for new panels being broadcast on bonjour
+    // when new panel is detected, add to this.panels array
+    // if socket is passed, emit a 'panel' event when new panel is found
     constructor(socket) {
         console.log('Listening for panels');
         this.panels = [];
