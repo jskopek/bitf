@@ -2,7 +2,6 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
-var bonjour = require('bonjour')();
 
 var LaunchpadController = require('./modules/launchpad.js');
 
@@ -21,24 +20,13 @@ launchpad.on('configuration', (configuration) => {
     if(socket) { socket.emit('configuration', configuration); }
 });
 
-// monitor for new panels being broadcast on bonjour
-var panels = [];
-var browser = bonjour.find({type: 'panel'}, (service) => {
-    var panelData = {
-        'address': service.referer.address,
-        'port': service.port,
-        'offsetRow': parseInt(service.txt.offsetrow) || 0,
-        'offsetCol': parseInt(service.txt.offsetcol) || 0
-    };
-    panels.push(panelData);
-    console.log('Found Panel!', panelData);
-    if(socket) { socket.emit('panel', panelData); }
-});
+var BonjourPanelFinder = require('./modules/bonjourPanelFinder.js');
+var bonjourPanels = new BonjourPanelFinder(socket);
 
 // initialize web server
 app.set('view engine', 'ejs')
 app.use(express.static(__dirname));
-app.get('/', (req, res) => { res.render('index', {'panels': panels}); });
+app.get('/', (req, res) => { res.render('index', {'panels': bonjourPanels.panels}); });
 var port = process.argv[2] || 3000;
 server.listen(port, () => console.log(`Controller listening on port ${port}!`));
 
