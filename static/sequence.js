@@ -1,6 +1,10 @@
-class Sequence {
-    constructor(ceiling) {
-        this.ceiling = ceiling;
+const EventEmitter = require( 'events' );
+
+class Sequence extends EventEmitter {
+    // emits 'render' with sequence values every time a step is changed
+    constructor() {
+        super();
+
         this.step = 1;
         this.numSteps = 0;
 
@@ -21,15 +25,15 @@ class Sequence {
         this.step = 1;
         this.numSteps = this.sequence.length;
         if(this.sequence.length) {
-            this.ceiling.render(this.sequence[this.step - 1]);
+            this.emit('render', this.sequence[this.step - 1], this.sequence[this.step - 1]);
         }
     }
-    save() {
-        this.sequence[this.step - 1] = this.ceiling.save();
+    save(value) {
+        this.sequence[this.step - 1] = value;
         this.storeLocally();
     }
-    create() {
-        this.sequence.push(this.ceiling.save());
+    create(value) {
+        this.sequence.push(value);
         this.steps += 1;
         this.step += 1;
         this.numSteps = this.sequence.length;
@@ -48,12 +52,14 @@ class Sequence {
     next() {
         if(this.step >= this.sequence.length) { return; }
         this.step += 1;
-        this.ceiling.render(this.sequence[this.step - 1], this.playSpeed);
+        this.emit('render', this.sequence[this.step - 1], this.sequence[this.step - 2]);
     }
     prev() {
         if(this.step <= 1) { return; }
         this.step -= 1;
-        this.ceiling.render(this.sequence[this.step - 1], this.playSpeed);
+        var currValue = this.sequence[this.step - 1];
+        var prevValue = this.sequence[(this.step - 2 >= 0) ? this.step - 2 : 0];
+        this.emit('render', currValue, prevValue);
     }
     play() {
         if(this.running) { return; }

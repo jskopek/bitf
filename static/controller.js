@@ -10,7 +10,10 @@ canvas.height = window.innerHeight;
 var LEDSize = Math.min(canvas.width, canvas.height) / 4;
 var ceiling = new ClickableCeiling(canvas, 2, 4, LEDSize, 2);
 
-var sequence = new Sequence(ceiling);
+var sequence = new Sequence();
+sequence.on('render', (values, prevValues) => {
+    ceiling.render(values);
+})
 
 // ---------- Socket Server -----------
 // initialize socket io
@@ -89,11 +92,19 @@ sequenceGUI.add(sequence, 'step').listen();
 sequenceGUI.add(sequence, 'numSteps').listen();
 sequenceGUI.add(sequence, 'next');
 sequenceGUI.add(sequence, 'prev');
-sequenceGUI.add(sequence, 'save');
-sequenceGUI.add(sequence, 'create');
 sequenceGUI.add(sequence, 'remove');
 sequenceGUI.add(sequence, 'download');
 sequenceGUI.open();
+
+var SequenceCreation = function() {
+    this.save = () => { sequence.save(ceiling.save()); }
+    this.create = () => { sequence.create(ceiling.save()); }
+}
+var sequenceCreation = new SequenceCreation();
+var sequencCreationGUI = gui.addFolder('Sequence Creation');
+sequencCreationGUI.add(sequenceCreation, 'create');
+sequencCreationGUI.add(sequenceCreation, 'save');
+sequencCreationGUI.open();
 
 var sequenceRunnerGUI = gui.addFolder('Sequence Runner');
 sequenceRunnerGUI.add(sequence, 'play');
