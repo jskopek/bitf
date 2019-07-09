@@ -1,6 +1,7 @@
 var dat = require('dat.gui');
 var {Ceiling, ClickableCeiling} = require('./ceiling.js');
 var Sequence = require('./sequence.js');
+var Animator = require('./animator.js');
 
 // initialize canvas, ceiling, and sequencer
 var canvas = document.querySelector('#test');
@@ -10,9 +11,14 @@ canvas.height = window.innerHeight;
 var LEDSize = Math.min(canvas.width, canvas.height) / 4;
 var ceiling = new ClickableCeiling(canvas, 2, 4, LEDSize, 2);
 
+
+// WORK IN PROGRESS - ANIMATOR NEEDS TO ANIMATE BETWEEN OLD AND NEW VALUES
 var sequence = new Sequence();
+//var animator = new Animator(10, 100);
 sequence.on('render', (values, prevValues) => {
-    ceiling.render(values);
+    Animator(prevValues, values, 10, 100, (animatedValues) => {
+        ceiling.render(animatedValues);
+    });
 })
 
 // ---------- Socket Server -----------
