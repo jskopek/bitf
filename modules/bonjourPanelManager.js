@@ -17,6 +17,22 @@ class BonjourPanel {
     }
 }
 
+function getPartialCeilingColors(ledMatrix, panelOffsetRow, panelOffsetCol, panelRows, panelCols) {
+    var colors = [];
+    for(var iRow = panelOffsetRow; iRow < panelRows + panelOffsetRow; iRow++) {
+        for(var iCol = panelOffsetCol; iCol < panelCols + panelOffsetCol; iCol++) {
+            var rgbArray = ledMatrix[iRow][iCol];
+            try {
+                var rgbString = `rgb(${rgbArray[0]},${rgbArray[1]},${rgbArray[2]})`
+                colors.push(rgbString);
+            }  catch(err) {
+                console.error(`getPartialCeilingColors does not have data for row:${iRow} col:${iCol}; is the panel correctly configured?`)
+            }
+        }
+    }
+    return colors;
+}
+
 class BonjourPanelManager extends EventEmitter {
     // monitor for new panels being broadcast on bonjour
     // when new panel is detected, add to this.panels array
@@ -24,7 +40,7 @@ class BonjourPanelManager extends EventEmitter {
     constructor() {
         super();
         console.log('Listening for panels');
-        this.panels = [];
+        this.bonjourPanels = [];
 
         var browser = bonjour.find({type: 'panel'}, (service) => {
             var panelData = {
@@ -36,37 +52,22 @@ class BonjourPanelManager extends EventEmitter {
 
             console.log('Found Panel!', panelData);
 
-            var panel = new BonjourPanel(`http://${panelData.address}:${panelData.port}`, panelData.offsetRow, panelData.offsetCol)
-            this.panels.push(panel);
+            var bonjourPanel = new BonjourPanel(`http://${panelData.address}:${panelData.port}`, panelData.offsetRow, panelData.offsetCol)
+            this.bonjourPanels.push(bonjourPanel);
 
             this.emit('new', panelData); 
         });
         console.log('Listening for panels');
     }
-    add(panel) {
-        this.panels.push(panel);
+    add(bonjourPanel) {
+        this.bonjourPanels.push(bonjourPanel);
     }
     send(ledMatrix) {
-        this.panels.forEach((panel) => {
-            var panelColors = this.getPartialCeilingColors(ledMatrix, panel.offsetRow, panel.offsetCol, panel.rows, panel.cols);
-            panel.send(panelColors);
+        this.bonjourPanels.forEach((bonjourPanel) => {
+            var panelColors = getPartialCeilingColors(ledMatrix, bonjourPanel.offsetRow, bonjourPanel.offsetCol, bonjourPanel.rows, bonjourPanel.cols);
+            console.log('BonjourPanelManager.send', ledMatrix, panelColors);
+            bonjourPanel.send(panelColors);
         });
-    }
-    getPartialCeilingColors(ledMatrix, panelOffsetRow, panelOffsetCol, panelRows, panelCols) {
-        var colors = [];
-        for(var iRow = panelOffsetRow; iRow < panelRows + panelOffsetRow; iRow++) {
-            for(var iCol = panelOffsetCol; iCol < panelCols + panelOffsetCol; iCol++) {
-                var rgbArray = ledMatrix[iRow][iCol];
-                try {
-                    var rgbString = `rgb(${rgbArray[0]},${rgbArray[1]},${rgbArray[2]})`
-                    console.log(rgbString);
-                    colors.push(rgbString);
-                }  catch(err) {
-                    console.error(`getPartialCeilingColors does not have data for row:${iRow} col:${iCol}; is the panel correctly configured?`)
-                }
-            }
-        }
-        return colors;
     }
 }
 

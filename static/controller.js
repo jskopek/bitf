@@ -1,6 +1,7 @@
 // TODO: animating between old and new values
 // TODO: two LEDs per ceiling
 // TODO: effects for two LEDs
+// TODO: additional configuration for valuesToMatrix to allow translation to alternative connections
 
 var dat = require('dat.gui');
 var {Ceiling, ClickableCeiling} = require('./ceiling.js');
@@ -29,7 +30,6 @@ var sequence = new Sequence();
 sequence.on('render', (values, prevValues) => {
     //Animator(prevValues, values, 10, 100, (animatedValues) => {
     ceiling.setColorValues(values);
-    console.log('render.valuesToMatrix', valuesToMatrix(values, ceiling.rows, ceiling.cols));
     //});
 })
 // ----------- END SEQUENCER: STORES SEQUENCES OF LIGHTS --------------------------------------
@@ -61,8 +61,10 @@ socket.on('configuration', (configData) => {
 
 // send ceiling updates to server
 sequence.on('render', (values) => {
-    socket.emit('render', values);
-    console.log('socket.render', values);
+    // convert the array of color arrays to a multi-dimensional matrix
+    var ledMatrix = valuesToMatrix(values, ceiling.rows, ceiling.cols);
+    socket.emit('render', ledMatrix);
+    console.log('socket.render', ledMatrix);
 });
 // ---------- END SOCKET SERVER -------------------------------------------------------------------
 

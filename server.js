@@ -4,7 +4,6 @@ var server = require('http').Server(app);
 
 
 // ---- BONJOUR-BASED PANEL COMMUNICATION --------------------------------------
-// initialize bonjour panel manager
 var {BonjourPanelManager} = require('./modules/bonjourPanelManager.js');
 var panelManager = new BonjourPanelManager();
 // ---- END BONJOUR-BASED PANEL COMMUNICATION ----------------------------------
@@ -12,7 +11,6 @@ var panelManager = new BonjourPanelManager();
 // (or)
 
 // ---- ARDUINO SERIAL-BASED PANEL COMMUNICATION -------------------------------
-// initialize arduino panel manager
 // var ArduinoPanelManager = require('./modules/arduinoPanelManager.js');
 // var panelManager = new ArduinoPanelManager('/dev/ttyS3', 9600);
 // ---- END ARDUINO SERIAL-BASED PANEL COMMUNICATION ---------------------------
