@@ -21,6 +21,13 @@ Example: https://www.adafruit.com/product/683
 
 Wire the LED data pin to port 2 and clock pin to port 3 on the arduino
 
+Four variants are provided:
+
+- `starfield-arduino.ino`: Receives commands from the `controller.js` via the 9600 baud serial port
+- `arduino-failsafe-white.ino`: Shows a static white light; does not require computer
+- `arduino-failsafe-white-alt.ino`: Shows a static white light (alternative); does not require computer
+- `arduino-failsafe-color.ino`: Shows a changing wheel of color; does not require computer
+
 # Computer based light generator
 
 Before you run this, you need to determine the arduino's COM port and set the `const path` to the proper port. See this guide for instructions on how to find the port: https://www.mathworks.com/help/supportpkg/arduinoio/ug/find-arduino-port-on-windows-mac-and-linux.html
@@ -34,3 +41,12 @@ To get this running, just run `npm install`, then `npm controller.js`
 If you want to compile to Arduino from the command line (e.g. editing in an IDE) you can do so by calling the arduino executable with the `--upload` and `--port` params. EG:
 
 `arduino.exe --upload ~\starfield-arduino\starfield-arduino.ino --port COM3`
+
+
+# TODO
+
+TODO: animating between old and new values
+TODO: two LEDs per ceiling
+TODO: effects for two LEDs
+
+
