@@ -12,7 +12,6 @@ class Sequence extends EventEmitter {
         this.loop = true;
         this.boomerang = true;
         this.directionForward = true;
-        this.playSpeed = 150;
         this.sequence = [];
 
         var sequenceStr = localStorage.getItem('sequence');
@@ -64,30 +63,38 @@ class Sequence extends EventEmitter {
     play() {
         if(this.running) { return; }
         this.running = true;
-        this.run();
+        this.advanceSequence();
     }
     stop() {
         this.running = false;
     }
-    run() {
+    advanceSequence() {
+        // step through one step of the sequence, including boomerang/loop situations
         if(!this.running) { return; }
         var isFinalStep = this.step == this.sequence.length ? true : false
         var isFirstStep = this.step == 1 ? true : false
         if(isFirstStep && this.boomerang && !this.directionForward) {
             this.directionForward = true;
+            this.next()
         } else if(isFinalStep && this.boomerang && this.directionForward) {
             this.directionForward = false;
+            this.prev()
         } else if(!isFinalStep && this.directionForward) {
             this.next();
         } else if(!isFirstStep && !this.directionForward) {
             this.prev();
         } else if(isFinalStep && this.loop) {
             this.step = 1;
+            this.next();
         } else {
             this.running = false;
         }
 
-        setTimeout(() => { this.run() }, this.playSpeed);
+    }
+    run(playSpeed) {
+        // call advanceSequence every `playSpeed` ms
+        this.advanceSequence();
+        setTimeout(() => { this.run(playSpeed) }, playSpeed);
     }
     download() {
         var exportObj = this.sequence;

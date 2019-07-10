@@ -40,7 +40,7 @@ class Animator {
         this.stepInterval = stepInterval;
         this.stepFnIdentifier = undefined;
     }
-    animate(prevRgbArrays, rgbArrays, animatedValueFn) {
+    animate(prevRgbArrays, rgbArrays, animatedValueFn, completionFn) {
         // clear any existing animation instances before animating again
         clearTimeout(this.stepFnIdentifier);
 
@@ -79,6 +79,8 @@ class Animator {
             currentStep += 1;
             if(currentStep < this.numSteps) {
                 this.stepFnIdentifier = setTimeout(step, this.stepInterval);
+            } else {
+                completionFn();
             }
         }
         step();

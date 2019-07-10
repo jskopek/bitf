@@ -57,12 +57,17 @@ socket.on('configuration', (configData) => {
 var animator = new Animator(10, 100);
 sequence.on('render', (values, prevValues) => {
     animator.animate(prevValues, values, (stepValues) => {
-
+        // step function
         // update ceiling with new colors
         ceiling.setColorValues(stepValues);
 
         // send new colors to server, which will send them to the starfield hardware
         socket.emit('render', stepValues);
+    }, () => {
+        // completion function
+        if(sequence.running) {
+            sequence.advanceSequence();
+        }
     });
 })
 // ---------- END SEQUENCER PART 2 ----------------------------------------------------------------
@@ -77,7 +82,12 @@ var microphone = new Microphone(100);
 microphone.on('volume', (volume) => {
     if(!microphone.visualizeAbsolute) { return; }
     var sequenceStep = Math.floor((sequence.numSteps - 1) * volume)
-    ceiling.setColorValues(sequence.sequence[sequenceStep]);
+    console.log('microphone.on.volume');
+
+    // send values to ceiling and server
+    var values = sequence.sequence[sequenceStep]
+    ceiling.setColorValues(values);
+    socket.emit('render', values);
 });
 microphone.on('volumeIncreased', (volume) => { if(!microphone.visualizeAbsolute) { sequence.next(); }});
 microphone.on('volumeDecreased', (volume) => { if(!microphone.visualizeAbsolute) { sequence.prev(); }});
@@ -120,7 +130,7 @@ sequenceGUI.add(sequence, 'remove');
 sequenceGUI.add(sequence, 'download');
 sequenceGUI.open();
 
-var SequenceCreation = function() {
+var GUICommands = function() {
     this.save = () => { 
         // generate an array of color arrays for each panel in the ceiling, and overwrite the current sequence step with value
         var panelColorArrays = ceiling.getPanelArray().map((panel) => { return panel.getColorArray(); })
@@ -132,10 +142,10 @@ var SequenceCreation = function() {
         sequence.create(panelColorArrays); 
     }
 }
-var sequenceCreation = new SequenceCreation();
+var guiCommands = new GUICommands();
 var sequencCreationGUI = gui.addFolder('Sequence Creation');
-sequencCreationGUI.add(sequenceCreation, 'create');
-sequencCreationGUI.add(sequenceCreation, 'save');
+sequencCreationGUI.add(guiCommands, 'create');
+sequencCreationGUI.add(guiCommands, 'save');
 sequencCreationGUI.open();
 
 var sequenceRunnerGUI = gui.addFolder('Sequence Runner');
@@ -144,7 +154,7 @@ sequenceRunnerGUI.add(sequence, 'stop');
 sequenceRunnerGUI.add(sequence, 'loop')
 sequenceRunnerGUI.add(sequence, 'boomerang')
 sequenceRunnerGUI.add(sequence, 'directionForward').listen();
-sequenceRunnerGUI.add(sequence, 'playSpeed', 100, 3000).listen();
+//sequenceRunnerGUI.add(sequence, 'playSpeed', 100, 3000).listen();
 sequenceRunnerGUI.open();
 
 var microphoneGUI = gui.addFolder('Microphone Input');
@@ -156,7 +166,7 @@ microphoneGUI.add(microphone, 'visualizeAbsolute');
 microphoneGUI.open();
 
 var animatorGUI = gui.addFolder('Animator');
-animatorGUI.add(animator, 'numSteps', 10, 100);
+animatorGUI.add(animator, 'numSteps', 1, 100);
 animatorGUI.add(animator, 'stepInterval', 100, 5000);
 animatorGUI.open();
 // ------------- END GUI ----------------------------------------------------------------------------------

@@ -28,7 +28,7 @@ var socket = undefined;
 io.on('connection', (newSocket) => { 
     socket = newSocket
     socket.on('render', (panelColorsArray) => {
-        console.log('socket.render', panelColorsArray);
+        //console.log('socket.render', panelColorsArray);
         panelManager.send(panelColorsArray);
     });
 //    newSocket.on('render', (ledMatrix) => {
