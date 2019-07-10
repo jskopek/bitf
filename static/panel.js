@@ -6,7 +6,6 @@ class Panel {
         this.x = x;
         this.y = y;
         this.size = size;
-        this.opacity = 1;
         this.red = Math.round(Math.random() * 255);
         this.green = Math.round(Math.random() * 255);
         this.blue = Math.round(Math.random() * 255);
@@ -18,24 +17,20 @@ class Panel {
         this.ctx.clearRect(this.x, this.y, this.size, this.size);
         this.ctx.beginPath();
         this.ctx.rect(this.x,this.y,this.size,this.size);
-        this.ctx.fillStyle = `rgba(${this.red},${this.green},${this.blue},${this.opacity})`;
+        this.ctx.fillStyle = `rgb(${this.red},${this.green},${this.blue})`;
         this.ctx.fill();
     }
-    setColor(red, green, blue, opacity) {
+    setColor(red, green, blue) {
         this.red = red;
         this.green = green;
         this.blue = blue;
-        this.opacity = opacity;
         this.render()
     }
-    save() {
-        return [this.red, this.green, this.blue, this.opacity];
-    }
     colorStr() {
-        return `rgb(${this.red},${this.green},${this.blue})`
+        return `rgb(${parseInt(this.red)},${parseInt(this.green)},${parseInt(this.blue)})`
     }
-    colorArray() {
-        return [this.red, this.green, this.blue];
+    getColorArray() {
+        return [parseInt(this.red), parseInt(this.green), parseInt(this.blue)];
     }
 
 //    setColorSequence(red, green, blue, opacity, playSpeed) {

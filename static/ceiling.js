@@ -26,7 +26,7 @@ class Ceiling {
         var values = []
         for(var row = 0; row < this.rows; row++) {
             for(var col = 0; col < this.cols; col++) {
-                values.push(this.panels[row][col].save());
+                values.push(this.panels[row][col].getColorArray());
             }
         }
         return values;
@@ -36,7 +36,7 @@ class Ceiling {
         for(var row = 0; row < this.rows; row++) {
             for(var col = 0; col < this.cols; col++) {
                 var color = values[i];
-                this.panels[row][col].setColor(color[0], color[1], color[2], color[3]);
+                this.panels[row][col].setColor(color[0], color[1], color[2]);
                 i++;
             }
         }
@@ -55,10 +55,9 @@ class ClickableCeiling extends Ceiling {
             return false;
         }
     }
-    constructor(canvas, rows, cols, size, gap, color, opacity) {
+    constructor(canvas, rows, cols, size, gap, color) {
         super(canvas, rows, cols, size, gap);
         this.color = color || [40,180,105];
-        this.opacity = opacity || 1;
 
 
         // function that modifies panel color based on touch location
@@ -78,7 +77,7 @@ class ClickableCeiling extends Ceiling {
 
             var panel = this.panels[row][col];
 
-            panel.setColor(...this.color, this.opacity);
+            panel.setColor(...this.color);
 
         }
         // handle mouse events
@@ -89,7 +88,7 @@ class ClickableCeiling extends Ceiling {
             var panel = this.getPanelAtCoords(e.offsetX, e.offsetY);
             if(panel && !this.clickedPanels[`${panel.x}-${panel.y}`]) {
                 this.clickedPanels[`${panel.x}-${panel.y}`] = true;
-                panel.setColor(...this.color, this.opacity);
+                panel.setColor(...this.color);
             }
         });
 
@@ -101,7 +100,7 @@ class ClickableCeiling extends Ceiling {
             var panel = this.getPanelAtCoords(e.pageX, e.pageY);
             if(panel && !this.clickedPanels[`${panel.x}-${panel.y}`]) {
                 this.clickedPanels[`${panel.x}-${panel.y}`] = true;
-                panel.setColor(...this.color, this.opacity);
+                panel.setColor(...this.color);
             }
         });
     }
@@ -110,13 +109,11 @@ class ClickableCeiling extends Ceiling {
             var panel = this.getPanelAtCoords(e.offsetX, e.offsetY);
             if(!panel) { return; }
             this.color = [panel.red,panel.green,panel.blue];
-            this.opacity = panel.opacity
         }, {once: true});
         this.canvas.addEventListener('touchstart', (e) => {
             var panel = this.getPanelAtCoords(e.pageX, e.pageY);
             if(!panel) { return; }
             this.color = [panel.red,panel.green,panel.blue];
-            this.opacity = panel.opacity
         }, {once: true});
 
     }
@@ -124,7 +121,7 @@ class ClickableCeiling extends Ceiling {
         this.panels.forEach((row) => {
             row.forEach((panel) => {
                 console.log(panel);
-                panel.setColor(...this.color, this.opacity); 
+                panel.setColor(...this.color); 
             });
         });
     }
