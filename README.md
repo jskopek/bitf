@@ -7,7 +7,7 @@
 This is the code for the Starfield project. There are two parts:
 
 1. Arduino-based light controller: listens on port 9600 for sequences of light values and instructs the lights to change to those values
-2. Computer-based light generator: generates a pattern of lights and sends to the light controller on the serial baud rate of 9600
+2. Computer-based server: hosts the GUI controller and communicates with starfield panel via either serial port or bonjour connection
 
 # Arduino light controller
 
@@ -28,13 +28,53 @@ Four variants are provided:
 - `arduino-failsafe-white-alt.ino`: Shows a static white light (alternative); does not require computer
 - `arduino-failsafe-color.ino`: Shows a changing wheel of color; does not require computer
 
-# Computer based light generator
+# Server
 
-Before you run this, you need to determine the arduino's COM port and set the `const path` to the proper port. See this guide for instructions on how to find the port: https://www.mathworks.com/help/supportpkg/arduinoio/ug/find-arduino-port-on-windows-mac-and-linux.html
+## GUI Controller
 
-The controller will send commands on the serial port with baud rate of 9600. It will send an 'a', 'b', or 'c' command at random every 100ms
+The server creates a simple web server that renders the Controller UI. This client-side code is responsible for generating the light sequence.
 
-To get this running, just run `npm install`, then `npm controller.js`
+To launch the GUI controller, type `npm run server` and then point your browser to `http://localhost:3000`
+
+## Server - Ceiling Communication
+
+The creates a websocket server listens for `render` commands. These `render` commands should include an array of led values. The server will relay these on to the ceiling using either the `ArduinoPanelManager` or `BonjourPanelManager` panel manager classes (used to talk to the starfield ceiling).
+
+The code to create this socket connection is as follows:
+
+```var io = require('socket.io')(server);
+io.on('connection', (newSocket) => { 
+    newSocket.on('render', (ledMatrix) => {
+        panelManager.send(ledMatrix);
+    });
+});```
+
+
+### ArduinoPanelManager
+
+Used to communicate with Arduino-powered panel over serial port. Configure the serial address and baud rate when setting up the panel. The `ledsPerPanel` option will duplicate each color value in the array by that number of times, so every LED in each panel is the same. This code can be extended in the future to allow for a funkier star effect.
+
+Example:
+
+```// initialize arduino panel manager
+var ArduinoPanelManager = require('./modules/arduinoPanelManager.js');
+var panelManager = new ArduinoPanelManager({
+    path: '/dev/ttyS3', 
+    baudRate: 9600, 
+    ledsPerPanel: 2
+});
+```
+
+### BonjourPanelManager
+
+Used to communicate with Raspberry-PI powered panel over local network Bonjour discovery. An example bonjour client panel is available in the `bonjourClient/panel.js` code
+
+Example:
+
+```// initialize bonjour panel manager
+var {BonjourPanelManager} = require('./modules/bonjourPanelManager.js');
+var panelManager = new BonjourPanelManager(2, 4);```
+
 
 # Notes
 
@@ -48,5 +88,3 @@ If you want to compile to Arduino from the command line (e.g. editing in an IDE)
 TODO: animating between old and new values
 TODO: two LEDs per ceiling
 TODO: effects for two LEDs
-
-
