@@ -5,8 +5,8 @@
   "main": "bitf.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "webpack": "webpack",
-    "monitor-webpack": "webpack --watch",
+    "webpack-compile": "webpack",
+    "webpack": "webpack --watch",
     "server": "nodemon controller.js",
     "heroku-postbuild": "webpack"
   },

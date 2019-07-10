@@ -12,14 +12,14 @@ var socket = undefined;
 //    });
 //});
 
-// // initialize bonjour panel manager
-// var {BonjourPanelManager} = require('./modules/bonjourPanelManager.js');
-// var panelManager = new BonjourPanelManager();
+// initialize bonjour panel manager
+var {BonjourPanelManager} = require('./modules/bonjourPanelManager.js');
+var panelManager = new BonjourPanelManager();
 
 
 // initialize arduino panel manager
-var ArduinoPanelManager = require('./modules/arduinoPanelManager.js');
-var panelManager = new ArduinoPanelManager('/dev/ttyS3', 9600);
+// var ArduinoPanelManager = require('./modules/arduinoPanelManager.js');
+// var panelManager = new ArduinoPanelManager('/dev/ttyS3', 9600);
 
 io.on('connection', (newSocket) => { 
     newSocket.on('render', (ledMatrix) => {

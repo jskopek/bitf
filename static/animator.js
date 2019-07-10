@@ -23,7 +23,7 @@
 
 // WORK IN PROGRESS - ANIMATOR NEEDS TO ANIMATE BETWEEN OLD AND NEW VALUES
 function Animator(prevValues, values, numSteps, stepInterval, animatedValueFn) {
-    console.log('Animator', numSteps, stepInterval);
+    console.log('Animator', prevValues, numSteps, stepInterval);
     var currentStep = 0;
 
     var animate = () => {

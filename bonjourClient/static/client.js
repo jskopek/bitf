@@ -38,7 +38,7 @@ class Visualizer {
 }
 
 var canvas = document.querySelector('canvas');
-var visualizer = new Visualizer(canvas, 2, 2);
+var visualizer = new Visualizer(canvas, 4, 2);
 
 window.addEventListener('resize', () => { visualizer.resizeCanvas(); });
 

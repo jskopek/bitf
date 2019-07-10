@@ -1,7 +1,11 @@
+// TODO: animating between old and new values
+// TODO: two LEDs per ceiling
+// TODO: effects for two LEDs
+
 var dat = require('dat.gui');
 var {Ceiling, ClickableCeiling} = require('./ceiling.js');
 var Sequence = require('./sequence.js');
-var Animator = require('./animator.js');
+//var Animator = require('./animator.js');
 
 // initialize canvas, ceiling, and sequencer
 var canvas = document.querySelector('#test');
@@ -16,9 +20,9 @@ var ceiling = new ClickableCeiling(canvas, 2, 4, LEDSize, 2);
 var sequence = new Sequence();
 //var animator = new Animator(10, 100);
 sequence.on('render', (values, prevValues) => {
-    Animator(prevValues, values, 10, 100, (animatedValues) => {
-        ceiling.render(animatedValues);
-    });
+    //Animator(prevValues, values, 10, 100, (animatedValues) => {
+    ceiling.render(values);
+    //});
 })
 
 // ---------- Socket Server -----------

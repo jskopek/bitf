@@ -8,7 +8,7 @@ class BonjourPanel {
     constructor(url, offsetRow, offsetCol) {
         this.url = url
         this.rows = 2; /* hardcoded for now */
-        this.cols = 2; /* hardcoded for now */
+        this.cols = 4; /* hardcoded for now */
         this.offsetRow = offsetRow;
         this.offsetCol = offsetCol;
     }
@@ -59,6 +59,7 @@ class BonjourPanelManager extends EventEmitter {
                 var rgbArray = ledMatrix[iRow][iCol];
                 try {
                     var rgbString = `rgb(${rgbArray[0]},${rgbArray[1]},${rgbArray[2]})`
+                    console.log(rgbString);
                     colors.push(rgbString);
                 }  catch(err) {
                     console.error(`getPartialCeilingColors does not have data for row:${iRow} col:${iCol}; is the panel correctly configured?`)

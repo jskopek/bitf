@@ -1,8 +1,9 @@
 const EventEmitter = require( 'events' );
-var LED = require('./led.js');
+var Panel = require('./panel.js');
+var { valuesToMatrix } = require('./utils.js');
 
 class Ceiling extends EventEmitter {
-    /* Represents the complete tent ceiling. Manages the individual LEDs */
+    /* Represents the complete tent ceiling. Manages the individual Panels */
     constructor(canvas, rows, cols, size, gap) {
         super();
         this.canvas = canvas;
@@ -10,71 +11,50 @@ class Ceiling extends EventEmitter {
         this.cols = cols;
         this.size = size;
         this.gap = gap;
-        this.leds = [];
+        this.panels = [];
 
         for(var row = 0; row < rows; row++) {
-            var rowLEDs = [];
+            var rowPanels = [];
             for(var col = 0; col < cols; col++) {
                 var x = col * (this.size + this.gap);
                 var y = row * (this.size + this.gap);
-                var led = new LED(this.canvas, x, y, this.size - this.gap);
-                rowLEDs.push(led);
+                var panel = new Panel(this.canvas, x, y, this.size - this.gap);
+                rowPanels.push(panel);
             }
-            this.leds.push(rowLEDs);
+            this.panels.push(rowPanels);
         }
     }
     save() {
         var values = []
         for(var row = 0; row < this.rows; row++) {
             for(var col = 0; col < this.cols; col++) {
-                values.push(this.leds[row][col].save());
+                values.push(this.panels[row][col].save());
             }
         }
         return values;
     }
-    valuesToMatrix(values) {
-        // takes a flat array of values (e.g. [1,2,3,4,5,6]) and converts to a matrix of row/col values based on ceiling
-        // dimensions (e..g [[1,2,3],[4,5,6]])
-        var matrix = []
-        var i = 0;
-        for(var row = 0; row < this.rows; row++) {
-            matrix.push([]);
-            for(var col = 0; col < this.cols; col++) {
-                matrix[row].push(values[i]);
-                i++;
-            }
-        }
-        return matrix
-    }
-    render(values, playSpeed) {
+    render(values) {
         var i = 0;
         for(var row = 0; row < this.rows; row++) {
             for(var col = 0; col < this.cols; col++) {
                 var color = values[i];
-                this.leds[row][col].setColor(color[0], color[1], color[2], color[3], playSpeed);
+                this.panels[row][col].setColor(color[0], color[1], color[2], color[3]);
                 i++;
             }
         }
 
-        //this.emit('render', values);
-
-        console.log('ledMatrix', this.valuesToMatrix(values));
-        this.emit('render', this.valuesToMatrix(values));
-
-
-
-        // send to pusher
-        //fetch('/push/?sequence=' + encodeURIComponent(JSON.stringify(values)));
+        console.log('panelMatrix', valuesToMatrix(values, this.rows, this.cols));
+        this.emit('render', valuesToMatrix(values, this.rows, this.cols));
     }
 }
 
 class ClickableCeiling extends Ceiling {
-    /* A variant of the Ceiling that allows user to change properties of LEDs by clicking on them */
-    getLEDAtCoords(x, y) {
+    /* A variant of the Ceiling that allows user to change properties of Panels by clicking on them */
+    getPanelAtCoords(x, y) {
         var col = Math.floor(x / (this.size + this.gap));
         var row = Math.floor(y / (this.size + this.gap));
         try {
-            return this.leds[row][col];
+            return this.panels[row][col];
         } catch {
             return false;
         }
@@ -85,70 +65,70 @@ class ClickableCeiling extends Ceiling {
         this.opacity = opacity || 1;
 
 
-        // function that modifies led color based on touch location
-        var setLEDColor = (canvasX, canvasY) => {
-            if(!this.clickedLEDs) { return; }
+        // function that modifies panel color based on touch location
+        var setPanelColor = (canvasX, canvasY) => {
+            if(!this.clickedPanels) { return; }
 
             var col = Math.floor(canvasX / (this.size + this.gap));
             var row = Math.floor(canvasY / (this.size + this.gap));
 
-            // check if led has already been clicked; if so, don't run again
+            // check if panel has already been clicked; if so, don't run again
             var key = `${col}-${row}`
-            if(this.clickedLEDs[key]) {
+            if(this.clickedPanels[key]) {
                 return;
             } else {
-                this.clickedLEDs[key] = true;
+                this.clickedPanels[key] = true;
             }
 
-            var led = this.leds[row][col];
+            var panel = this.panels[row][col];
 
-            led.setColor(...this.color, this.opacity);
+            panel.setColor(...this.color, this.opacity);
 
         }
         // handle mouse events
-        this.canvas.addEventListener('mousedown', (e) => { this.clickedLEDs = {}; });
-        this.canvas.addEventListener('mouseup', (e) => { this.clickedLEDs = false });
+        this.canvas.addEventListener('mousedown', (e) => { this.clickedPanels = {}; });
+        this.canvas.addEventListener('mouseup', (e) => { this.clickedPanels = false });
         this.canvas.addEventListener('mousemove', (e) => { 
-            if(!this.clickedLEDs) { return; }
-            var led = this.getLEDAtCoords(e.offsetX, e.offsetY);
-            if(led && !this.clickedLEDs[`${led.x}-${led.y}`]) {
-                this.clickedLEDs[`${led.x}-${led.y}`] = true;
-                led.setColor(...this.color, this.opacity);
+            if(!this.clickedPanels) { return; }
+            var panel = this.getPanelAtCoords(e.offsetX, e.offsetY);
+            if(panel && !this.clickedPanels[`${panel.x}-${panel.y}`]) {
+                this.clickedPanels[`${panel.x}-${panel.y}`] = true;
+                panel.setColor(...this.color, this.opacity);
             }
         });
 
         // handle touch events
-        this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); this.clickedLEDs = {}; });
-        this.canvas.addEventListener('touchend', (e) => { this.clickedLEDs = false });
+        this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); this.clickedPanels = {}; });
+        this.canvas.addEventListener('touchend', (e) => { this.clickedPanels = false });
         this.canvas.addEventListener('touchmove', (e) => {
-            if(!this.clickedLEDs) { return; }
-            var led = this.getLEDAtCoords(e.pageX, e.pageY);
-            if(led && !this.clickedLEDs[`${led.x}-${led.y}`]) {
-                this.clickedLEDs[`${led.x}-${led.y}`] = true;
-                led.setColor(...this.color, this.opacity);
+            if(!this.clickedPanels) { return; }
+            var panel = this.getPanelAtCoords(e.pageX, e.pageY);
+            if(panel && !this.clickedPanels[`${panel.x}-${panel.y}`]) {
+                this.clickedPanels[`${panel.x}-${panel.y}`] = true;
+                panel.setColor(...this.color, this.opacity);
             }
         });
     }
     sample() {
         this.canvas.addEventListener('click', (e) => {
-            var led = this.getLEDAtCoords(e.offsetX, e.offsetY);
-            if(!led) { return; }
-            this.color = [led.red,led.green,led.blue];
-            this.opacity = led.opacity
+            var panel = this.getPanelAtCoords(e.offsetX, e.offsetY);
+            if(!panel) { return; }
+            this.color = [panel.red,panel.green,panel.blue];
+            this.opacity = panel.opacity
         }, {once: true});
         this.canvas.addEventListener('touchstart', (e) => {
-            var led = this.getLEDAtCoords(e.pageX, e.pageY);
-            if(!led) { return; }
-            this.color = [led.red,led.green,led.blue];
-            this.opacity = led.opacity
+            var panel = this.getPanelAtCoords(e.pageX, e.pageY);
+            if(!panel) { return; }
+            this.color = [panel.red,panel.green,panel.blue];
+            this.opacity = panel.opacity
         }, {once: true});
 
     }
     fill() {
-        this.leds.forEach((row) => {
-            row.forEach((led) => {
-                console.log(led);
-                led.setColor(...this.color, this.opacity); 
+        this.panels.forEach((row) => {
+            row.forEach((panel) => {
+                console.log(panel);
+                panel.setColor(...this.color, this.opacity); 
             });
         });
     }
