@@ -1,8 +1,6 @@
 const SerialPort = require('serialport')
 const Readline = require('@serialport/parser-readline')
-var { duplicateValues } = require('../static/utils.js');
-
-const flatSingle = arr => [].concat(...arr);
+var { duplicateValues, flattenMatrixOnce } = require('../static/utils.js');
 
 
 class ArduinoPanelManager {

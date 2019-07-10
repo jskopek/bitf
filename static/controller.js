@@ -5,7 +5,7 @@
 var dat = require('dat.gui');
 var {Ceiling, ClickableCeiling} = require('./ceiling.js');
 var Sequence = require('./sequence.js');
-//var Animator = require('./animator.js');
+var Animator = require('./animator.js');
 
 
 
@@ -21,16 +21,9 @@ var ceiling = new ClickableCeiling(canvas, 2, 4, LEDSize, 2);
 
 
 
-// ----------- SEQUENCER: STORES SEQUENCES OF LIGHTS ----------------------------------------
-// WORK IN PROGRESS - ANIMATOR NEEDS TO ANIMATE BETWEEN OLD AND NEW VALUES
+// ----------- SEQUENCER PART 1: STORES SEQUENCES OF LIGHTS ----------------------------------
 var sequence = new Sequence();
-//var animator = new Animator(10, 100);
-sequence.on('render', (values, prevValues) => {
-    //Animator(prevValues, values, 10, 100, (animatedValues) => {
-    ceiling.setColorValues(values);
-    //});
-})
-// ----------- END SEQUENCER: STORES SEQUENCES OF LIGHTS --------------------------------------
+// ----------- END SEQUENCER PART 1: STORES SEQUENCES OF LIGHTS ------------------------------
 
 
 
@@ -56,12 +49,23 @@ socket.on('configuration', (configData) => {
         sequence.playSpeed = configData.level * 1500;
     }
 });
-
-// send ceiling updates to server
-sequence.on('render', (panelColorsArray) => {
-    socket.emit('render', panelColorsArray);
-});
 // ---------- END SOCKET SERVER -------------------------------------------------------------------
+
+
+
+// ---------- SEQUENCER PART 2: WHEN SEQUENCE CHANGES, ANIMATE CHANGE AND SEND TO CEILING ---------
+var animator = new Animator(10, 100);
+sequence.on('render', (values, prevValues) => {
+    animator.animate(prevValues, values, (stepValues) => {
+
+        // update ceiling with new colors
+        ceiling.setColorValues(stepValues);
+
+        // send new colors to server, which will send them to the starfield hardware
+        socket.emit('render', stepValues);
+    });
+})
+// ---------- END SEQUENCER PART 2 ----------------------------------------------------------------
 
 
 
@@ -150,4 +154,11 @@ microphoneGUI.add(microphone, 'sampleRate', 20, 500).listen();
 microphoneGUI.add(microphone, 'multiplier', 0.2, 10).listen();
 microphoneGUI.add(microphone, 'visualizeAbsolute');
 microphoneGUI.open();
+
+var animatorGUI = gui.addFolder('Animator');
+animatorGUI.add(animator, 'numSteps', 10, 100);
+animatorGUI.add(animator, 'stepInterval', 100, 5000);
+animatorGUI.open();
+// ------------- END GUI ----------------------------------------------------------------------------------
+
 // ------------- END GUI ----------------------------------------------------------------------------------

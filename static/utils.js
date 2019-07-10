@@ -13,6 +13,31 @@ function valuesToMatrix(values, rows, cols) {
     return matrix
 }
 
+function groupValuesIntoArrays(values, arraySize) {
+    // takes an array of values and groups them into arrays of arraySize
+    // e.g. groupValuesIntoArrays([1,2,3,4,5,6,7,8], 3) => [[1,2,3],[4,5,6],[7,8]]
+    // primarily used when taking a flat list of [R, G, B, R, G, B] values and grouping into [[R,G,B], [R,G,B]]
+    var groupedValues = [];
+    var newGroup = [];
+    for(var i = 0; i < values.length; i++) {
+        newGroup.push(values[i]);
+        if(newGroup.length == arraySize) {
+            groupedValues.push(newGroup);
+            newGroup = []
+        }
+    }
+    if(newGroup.length) {
+        groupedValues.push(newGroup);
+    }
+    return groupedValues;
+}
+
+function flattenMatrixOnce(matrix) {
+    // takes a matrix of values  and flattens once
+    // e.g. (e.g. flattenMatrixOnce([[1,2,3],[4,5,[6,7]]]) => [1,2,3,4,5,[6,7]]
+    return [].concat(...matrix);
+}
+
 function duplicateValues(values, numTimes) {
     // takes an array of values (or any array) and duplicates each entry numTimes
     // e.g. duplicateValues([1,2,3], 2) => [1,1,2,2,3,3]
@@ -28,4 +53,4 @@ function duplicateValues(values, numTimes) {
 }
 
 
-module.exports = { valuesToMatrix, duplicateValues }
+module.exports = { valuesToMatrix, groupValuesIntoArrays, flattenMatrixOnce, duplicateValues }
