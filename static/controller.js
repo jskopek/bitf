@@ -8,6 +8,9 @@ var { valuesToMatrix } = require('./utils.js');
 var Sequence = require('./sequence.js');
 //var Animator = require('./animator.js');
 
+
+
+// ----------- CANVAS & CEILING: RENDER INTERACTIVE CEILING IN GUI ---------------------------
 // initialize canvas, ceiling, and sequencer
 var canvas = document.querySelector('#test');
 canvas.width = window.innerWidth;
@@ -15,8 +18,11 @@ canvas.height = window.innerHeight;
 
 var LEDSize = Math.min(canvas.width, canvas.height) / 4;
 var ceiling = new ClickableCeiling(canvas, 2, 4, LEDSize, 2);
+// ----------- END CANVAS & CEILING: RENDER CEILING IN GUI -----------------------------------
 
 
+
+// ----------- SEQUENCER: STORES SEQUENCES OF LIGHTS ----------------------------------------
 // WORK IN PROGRESS - ANIMATOR NEEDS TO ANIMATE BETWEEN OLD AND NEW VALUES
 var sequence = new Sequence();
 //var animator = new Animator(10, 100);
@@ -26,8 +32,11 @@ sequence.on('render', (values, prevValues) => {
     console.log('render.valuesToMatrix', valuesToMatrix(values, ceiling.rows, ceiling.cols));
     //});
 })
+// ----------- END SEQUENCER: STORES SEQUENCES OF LIGHTS --------------------------------------
 
-// ---------- Socket Server -----------
+
+
+// ---------- SOCKET SERVER: COMMUNICATES WITH SERVER, WHICH SENDS MESSAGE TO PANELS -----------
 // initialize socket io
 var socket = io(); 
 
@@ -50,15 +59,16 @@ socket.on('configuration', (configData) => {
     }
 });
 
-
 // send ceiling updates to server
 sequence.on('render', (values) => {
     socket.emit('render', values);
     console.log('socket.render', values);
 });
-// ---------- End Socket Server -----------
+// ---------- END SOCKET SERVER -------------------------------------------------------------------
 
-// ----------- Microphone -------------
+
+
+// ----------- MICROPHONE -------------------------------------------------------------------------
 var Microphone = require('./microphone.js');
 var microphone = new Microphone(100);
 
@@ -70,10 +80,11 @@ microphone.on('volume', (volume) => {
 });
 microphone.on('volumeIncreased', (volume) => { if(!microphone.visualizeAbsolute) { sequence.next(); }});
 microphone.on('volumeDecreased', (volume) => { if(!microphone.visualizeAbsolute) { sequence.prev(); }});
-// ----------- End Microphone -------------
+// ----------- END MICROPHONE ---------------------------------------------------------------------
 
 
-// ------------ Load Dropped Sequences -------------
+
+// ------------ LOAD DROPPED SEQUENCES -------------------------------------------------------------
 window.addEventListener("dragover", (e) => { e.preventDefault(); },false);
 window.addEventListener("drop", (e) => {
     e.preventDefault();
@@ -87,10 +98,11 @@ window.addEventListener("drop", (e) => {
     reader.readAsText(file);
 
 },false);
-// ------------ End Load Dropped Sequences -------------
+// ------------ END LOAD DROPPED SEQUENCES ----------------------------------------------------------
 
 
-// ------------- GUI -----------------
+
+// ------------- GUI --------------------------------------------------------------------------------
 const gui = new dat.GUI();
 var styleGUI = gui.addFolder('Style');
 styleGUI.addColor(ceiling, 'color').listen();
@@ -134,4 +146,4 @@ microphoneGUI.add(microphone, 'sampleRate', 20, 500).listen();
 microphoneGUI.add(microphone, 'multiplier', 0.2, 10).listen();
 microphoneGUI.add(microphone, 'visualizeAbsolute');
 microphoneGUI.open();
-// ------------- End GUI -----------------
+// ------------- END GUI ----------------------------------------------------------------------------------
