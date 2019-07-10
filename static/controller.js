@@ -1,11 +1,9 @@
 // TODO: animating between old and new values
 // TODO: two LEDs per ceiling
 // TODO: effects for two LEDs
-// TODO: additional configuration for valuesToMatrix to allow translation to alternative connections
 
 var dat = require('dat.gui');
 var {Ceiling, ClickableCeiling} = require('./ceiling.js');
-var { valuesToMatrix } = require('./utils.js');
 var Sequence = require('./sequence.js');
 //var Animator = require('./animator.js');
 
@@ -60,11 +58,8 @@ socket.on('configuration', (configData) => {
 });
 
 // send ceiling updates to server
-sequence.on('render', (values) => {
-    // convert the array of color arrays to a multi-dimensional matrix
-    var ledMatrix = valuesToMatrix(values, ceiling.rows, ceiling.cols);
-    socket.emit('render', ledMatrix);
-    console.log('socket.render', ledMatrix);
+sequence.on('render', (panelColorsArray) => {
+    socket.emit('render', panelColorsArray);
 });
 // ---------- END SOCKET SERVER -------------------------------------------------------------------
 
@@ -122,8 +117,16 @@ sequenceGUI.add(sequence, 'download');
 sequenceGUI.open();
 
 var SequenceCreation = function() {
-    this.save = () => { sequence.save(ceiling.save()); }
-    this.create = () => { sequence.create(ceiling.save()); }
+    this.save = () => { 
+        // generate an array of color arrays for each panel in the ceiling, and overwrite the current sequence step with value
+        var panelColorArrays = ceiling.getPanelArray().map((panel) => { return panel.getColorArray(); })
+        sequence.save(panelColorArrays); 
+    }
+    this.create = () => { 
+        // generate an array of color arrays for each panel in the ceiling, and create new sequence step with value
+        var panelColorArrays = ceiling.getPanelArray().map((panel) => { return panel.getColorArray(); })
+        sequence.create(panelColorArrays); 
+    }
 }
 var sequenceCreation = new SequenceCreation();
 var sequencCreationGUI = gui.addFolder('Sequence Creation');

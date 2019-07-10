@@ -9,7 +9,7 @@ class Ceiling {
         this.cols = cols;
         this.size = size;
         this.gap = gap;
-        this.panels = [];
+        this.panels = []; // multi-dimension [row][col] dict of Panel instances
 
         for(var row = 0; row < rows; row++) {
             var rowPanels = [];
@@ -22,14 +22,16 @@ class Ceiling {
             this.panels.push(rowPanels);
         }
     }
-    save() {
-        var values = []
+    getPanelArray() {
+        // takes multi-dimension [row][col] this.panels dict and generates a flat array from it
+        var panels = []
         for(var row = 0; row < this.rows; row++) {
             for(var col = 0; col < this.cols; col++) {
-                values.push(this.panels[row][col].getColorArray());
+                panels.push(this.panels[row][col]);
             }
         }
-        return values;
+        return panels;
+
     }
     setColorValues(values) {
         var i = 0;

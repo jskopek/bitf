@@ -1,6 +1,7 @@
 const EventEmitter = require( 'events' );
 var bonjour = require('bonjour')();
 const fetch = require('node-fetch');
+var { valuesToMatrix } = require('../static/utils.js');
 
 // send ceiling render updates to viewer
 class BonjourPanel {
@@ -17,11 +18,11 @@ class BonjourPanel {
     }
 }
 
-function getPartialCeilingColors(ledMatrix, panelOffsetRow, panelOffsetCol, panelRows, panelCols) {
+function getPartialCeilingColors(colorMatrix, panelOffsetRow, panelOffsetCol, panelRows, panelCols) {
     var colors = [];
     for(var iRow = panelOffsetRow; iRow < panelRows + panelOffsetRow; iRow++) {
         for(var iCol = panelOffsetCol; iCol < panelCols + panelOffsetCol; iCol++) {
-            var rgbArray = ledMatrix[iRow][iCol];
+            var rgbArray = colorMatrix[iRow][iCol];
             try {
                 var rgbString = `rgb(${rgbArray[0]},${rgbArray[1]},${rgbArray[2]})`
                 colors.push(rgbString);
@@ -37,8 +38,13 @@ class BonjourPanelManager extends EventEmitter {
     // monitor for new panels being broadcast on bonjour
     // when new panel is detected, add to this.panels array
     // if socket is passed, emit a 'panel' event when new panel is found
-    constructor() {
+    constructor(rows, cols) {
         super();
+
+        // store the number of rows and cols in the ceiling; used to determine colors for each panel based on panels offsetRow and offsetCol values
+        this.rows = rows;
+        this.cols = cols; 
+
         console.log('Listening for panels');
         this.bonjourPanels = [];
 
@@ -62,13 +68,17 @@ class BonjourPanelManager extends EventEmitter {
     add(bonjourPanel) {
         this.bonjourPanels.push(bonjourPanel);
     }
-    send(ledMatrix) {
+    send(panelColorsArray) {
+        // convert the array of color arrays to a multi-dimensional matrix
+        var colorMatrix = valuesToMatrix(panelColorsArray, this.rows, this.cols);
+
         this.bonjourPanels.forEach((bonjourPanel) => {
-            var panelColors = getPartialCeilingColors(ledMatrix, bonjourPanel.offsetRow, bonjourPanel.offsetCol, bonjourPanel.rows, bonjourPanel.cols);
-            console.log('BonjourPanelManager.send', ledMatrix, panelColors);
+            var panelColors = getPartialCeilingColors(colorMatrix, bonjourPanel.offsetRow, bonjourPanel.offsetCol, bonjourPanel.rows, bonjourPanel.cols);
+            console.log('BonjourPanelManager.send', panelColorsArray, panelColors);
             bonjourPanel.send(panelColors);
         });
     }
+
 }
 
 module.exports = {BonjourPanelManager, BonjourPanel}

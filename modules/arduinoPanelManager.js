@@ -1,5 +1,6 @@
 const SerialPort = require('serialport')
 const Readline = require('@serialport/parser-readline')
+var { duplicateValues } = require('../static/utils.js');
 
 const flatSingle = arr => [].concat(...arr);
 
@@ -7,19 +8,22 @@ const flatSingle = arr => [].concat(...arr);
 class ArduinoPanelManager {
     /* responsible for connecting to the LED controller and sending commands. Commands should be sent to an Arduino
      * via the serial port */
-    constructor(path, baudRate) {
+    constructor(options) {
+        this.options = Object.assign({
+            'path': '/dev/ttyS3',
+            'baudRate': 9600,
+            'ledsPerPanel': 2
+        }, options);
+
         this.opened = false
         this.port = undefined;
         this.parser = undefined;
 
-        this.connect(path, baudRate);
+        this.connect(this.options.path, this.options.baudRate);
     }
 
     connect(path, baudRate) {
-        this.path = path;
-        this.baudRate = baudRate;
-
-        this.port = new SerialPort(this.path, { baudRate: this.baudRate });
+        this.port = new SerialPort(path, { baudRate: baudRate });
         this.parser = new Readline();
         this.port.pipe(this.parser);
 
@@ -36,16 +40,18 @@ class ArduinoPanelManager {
         })
 
     }
-    send(ledMatrix) {
-        /* send an array of [r,g,b] values to the LEDs */
-        var ledArray = flatSingle(ledMatrix)
-        let ledArrayString = ledArray.map(rgbArray => rgbArray.join(',')).join(';');
+    send(panelColorsArray) {
+        // duplicate the colors by this.options.ledsPerPanel times; creates value for each LED in panel
+        let ledColorsArray = duplicateValues(panelColorsArray, this.options.ledsPerPanel);
+
+        // generate LED string
+        let ledArrayString = ledColorsArray.map(rgbArray => rgbArray.join(',')).join(';');
 
         let command = `<${ledArrayString}>`
         
         if(this.opened) {
             this.port.write(command, (err) => {
-                if(err) { console.log(`error sending data through port baudRate: ${this.baudRate} command: ${command}`); }
+                if(err) { console.log(`error sending data through port baudRate: ${this.options.baudRate} command: ${command}`); }
                 console.log(`sent command: ${command}`);
             });
         } else {

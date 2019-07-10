@@ -5,14 +5,18 @@ var server = require('http').Server(app);
 
 // ---- BONJOUR-BASED PANEL COMMUNICATION --------------------------------------
 var {BonjourPanelManager} = require('./modules/bonjourPanelManager.js');
-var panelManager = new BonjourPanelManager();
+var panelManager = new BonjourPanelManager(2, 4);
 // ---- END BONJOUR-BASED PANEL COMMUNICATION ----------------------------------
 
 // (or)
 
 // ---- ARDUINO SERIAL-BASED PANEL COMMUNICATION -------------------------------
-// var ArduinoPanelManager = require('./modules/arduinoPanelManager.js');
-// var panelManager = new ArduinoPanelManager('/dev/ttyS3', 9600);
+//var ArduinoPanelManager = require('./modules/arduinoPanelManager.js');
+//var panelManager = new ArduinoPanelManager({
+//    path: '/dev/ttyS3', 
+//    baudRate: 9600, 
+//    ledsPerPanel: 2
+//});
 // ---- END ARDUINO SERIAL-BASED PANEL COMMUNICATION ---------------------------
 
 
@@ -23,10 +27,14 @@ var io = require('socket.io')(server);
 var socket = undefined;
 io.on('connection', (newSocket) => { 
     socket = newSocket
-    newSocket.on('render', (ledMatrix) => {
-        console.log('socket.render', ledMatrix)
-        panelManager.send(ledMatrix);
+    socket.on('render', (panelColorsArray) => {
+        console.log('socket.render', panelColorsArray);
+        panelManager.send(panelColorsArray);
     });
+//    newSocket.on('render', (ledMatrix) => {
+//        console.log('socket.render', ledMatrix)
+//        panelManager.send(ledMatrix);
+//    });
 });
 
 

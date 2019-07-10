@@ -26,9 +26,6 @@ class Panel {
         this.blue = blue;
         this.render()
     }
-    colorStr() {
-        return `rgb(${parseInt(this.red)},${parseInt(this.green)},${parseInt(this.blue)})`
-    }
     getColorArray() {
         return [parseInt(this.red), parseInt(this.green), parseInt(this.blue)];
     }

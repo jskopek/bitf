@@ -13,5 +13,19 @@ function valuesToMatrix(values, rows, cols) {
     return matrix
 }
 
+function duplicateValues(values, numTimes) {
+    // takes an array of values (or any array) and duplicates each entry numTimes
+    // e.g. duplicateValues([1,2,3], 2) => [1,1,2,2,3,3]
+    // e.g. duplicateValues([3,2,1], 3) => [3,3,3,2,2,2,1,1,1]
 
-module.exports = { valuesToMatrix }
+    var newArray = []
+    for(var i = 0; i < values.length; i++) {
+        for(var j = 0; j < numTimes; j++) {
+            newArray.push(values[i]);
+        }
+    }
+    return newArray
+}
+
+
+module.exports = { valuesToMatrix, duplicateValues }
