@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "webpack-compile": "webpack",
     "webpack": "webpack --watch",
-    "server": "nodemon controller.js",
+    "server": "nodemon server.js",
     "heroku-postbuild": "webpack"
   },
   "author": "",
