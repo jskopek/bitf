@@ -1,11 +1,9 @@
 const EventEmitter = require( 'events' );
 var Panel = require('./panel.js');
-var { valuesToMatrix } = require('./utils.js');
 
-class Ceiling extends EventEmitter {
+class Ceiling {
     /* Represents the complete tent ceiling. Manages the individual Panels */
     constructor(canvas, rows, cols, size, gap) {
-        super();
         this.canvas = canvas;
         this.rows = rows;
         this.cols = cols;
@@ -33,7 +31,7 @@ class Ceiling extends EventEmitter {
         }
         return values;
     }
-    render(values) {
+    setColorValues(values) {
         var i = 0;
         for(var row = 0; row < this.rows; row++) {
             for(var col = 0; col < this.cols; col++) {
@@ -43,8 +41,6 @@ class Ceiling extends EventEmitter {
             }
         }
 
-        console.log('panelMatrix', valuesToMatrix(values, this.rows, this.cols));
-        this.emit('render', valuesToMatrix(values, this.rows, this.cols));
     }
 }
 

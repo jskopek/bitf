@@ -4,6 +4,7 @@
 
 var dat = require('dat.gui');
 var {Ceiling, ClickableCeiling} = require('./ceiling.js');
+var { valuesToMatrix } = require('./utils.js');
 var Sequence = require('./sequence.js');
 //var Animator = require('./animator.js');
 
@@ -21,7 +22,8 @@ var sequence = new Sequence();
 //var animator = new Animator(10, 100);
 sequence.on('render', (values, prevValues) => {
     //Animator(prevValues, values, 10, 100, (animatedValues) => {
-    ceiling.render(values);
+    ceiling.setColorValues(values);
+    console.log('render.valuesToMatrix', valuesToMatrix(values, ceiling.rows, ceiling.cols));
     //});
 })
 
@@ -50,9 +52,9 @@ socket.on('configuration', (configData) => {
 
 
 // send ceiling updates to server
-ceiling.on('render', (values) => {
+sequence.on('render', (values) => {
     socket.emit('render', values);
-    console.log('render', values);
+    console.log('socket.render', values);
 });
 // ---------- End Socket Server -----------
 
@@ -64,7 +66,7 @@ var microphone = new Microphone(100);
 microphone.on('volume', (volume) => {
     if(!microphone.visualizeAbsolute) { return; }
     var sequenceStep = Math.floor((sequence.numSteps - 1) * volume)
-    ceiling.render(sequence.sequence[sequenceStep]);
+    ceiling.setColorValues(sequence.sequence[sequenceStep]);
 });
 microphone.on('volumeIncreased', (volume) => { if(!microphone.visualizeAbsolute) { sequence.next(); }});
 microphone.on('volumeDecreased', (volume) => { if(!microphone.visualizeAbsolute) { sequence.prev(); }});
