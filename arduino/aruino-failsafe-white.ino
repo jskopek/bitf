@@ -9,8 +9,8 @@
 // Can be any valid output pins.
 // The colors of the wires may be totally different so
 // BE SURE TO CHECK YOUR PIXELS TO SEE WHICH WIRES TO USE!
-uint8_t dataPin  = 2;    // Yellow wire on Adafruit Pixels
-uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
+uint8_t dataPin  = 3;    // Yellow wire on Adafruit Pixels
+uint8_t clockPin = 2;    // Green wire on Adafruit Pixels
 
 // Set the first variable to the NUMBER of pixels. 25 = 25 pixels in a row
 Adafruit_WS2801 strip = Adafruit_WS2801(20, dataPin, clockPin, WS2801_GRB);

@@ -24,8 +24,8 @@ Example sketch for driving Adafruit WS2801 pixels!
 // Can be any valid output pins.
 // The colors of the wires may be totally different so
 // BE SURE TO CHECK YOUR PIXELS TO SEE WHICH WIRES TO USE!
-uint8_t dataPin  = 2;    // Yellow wire on Adafruit Pixels
-uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
+uint8_t dataPin  = 3;    // Yellow wire on Adafruit Pixels
+uint8_t clockPin = 2;    // Green wire on Adafruit Pixels
 
 // Don't forget to connect the ground wire to Arduino ground,
 // and the +5V wire to a +5V supply
