@@ -4,19 +4,20 @@ var server = require('http').Server(app);
 
 
 // ---- BONJOUR-BASED PANEL COMMUNICATION --------------------------------------
-var {BonjourPanelManager} = require('./modules/bonjourPanelManager.js');
-var panelManager = new BonjourPanelManager(2, 4);
+//var {BonjourPanelManager} = require('./modules/bonjourPanelManager.js');
+//var panelManager = new BonjourPanelManager(2, 4);
 // ---- END BONJOUR-BASED PANEL COMMUNICATION ----------------------------------
 
 // (or)
 
 // ---- ARDUINO SERIAL-BASED PANEL COMMUNICATION -------------------------------
-//var ArduinoPanelManager = require('./modules/arduinoPanelManager.js');
-//var panelManager = new ArduinoPanelManager({
-//    path: '/dev/ttyS3', 
-//    baudRate: 9600, 
-//    ledsPerPanel: 2
-//});
+var ArduinoPanelManager = require('./modules/arduinoPanelManager.js');
+var panelManager = new ArduinoPanelManager({
+    //path: '/dev/ttyS3', 
+    path: '/dev/cu.usbmodem14101', 
+    baudRate: 9600, 
+    ledsPerPanel: 2
+});
 // ---- END ARDUINO SERIAL-BASED PANEL COMMUNICATION ---------------------------
 
 
