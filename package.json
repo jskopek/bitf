@@ -19,7 +19,7 @@
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "launchpad-mini": "^2.1.2",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "node-fetch": "^2.6.0",
     "pusher": "^2.2.0",
     "serialport": "^7.1.5",
