@@ -23,7 +23,7 @@
     "node-fetch": "^2.6.0",
     "pusher": "^2.2.0",
     "serialport": "^7.1.5",
-    "socket.io": "^2.2.0",
+    "socket.io": "^2.4.0",
     "three": "^0.100.0",
     "three-orbit-controls": "^82.1.0",
     "three-trackballcontrols": "0.0.7",
