@@ -17,7 +17,7 @@
     "dat.gui": "^0.7.5",
     "dotenv": "^6.2.0",
     "ejs": "^2.6.1",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "launchpad-mini": "^2.1.2",
     "lodash": "^4.17.11",
     "node-fetch": "^2.6.0",
